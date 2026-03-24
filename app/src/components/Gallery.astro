@@ -11,8 +11,8 @@ const { gallery, address } = property;
 
 const images = gallery.images ?? [];
 const featured = images[0];
-const preview = images.slice(1, 9); // up to 8 shown initially
-const overflow = images.slice(9);   // revealed on click
+const preview  = images.slice(1, 9); // up to 8 shown initially
+const overflow = images.slice(9);    // revealed on click
 const totalRemaining = overflow.length;
 ---
 
@@ -21,7 +21,12 @@ const totalRemaining = overflow.length;
 
     <!-- Featured image: full width, tall -->
     {featured && (
-      <div class="gallery__featured">
+      <div
+        class="gallery__featured"
+        data-lb-src={featured.url}
+        data-lb-alt={featured.alt || `${address.street} — featured`}
+        data-lb-group="gallery"
+      >
         <img
           src={featured.url}
           alt={featured.alt || `${address.street} — featured`}
@@ -39,7 +44,12 @@ const totalRemaining = overflow.length;
     {preview.length > 0 && (
       <div class="gallery__grid container" id="gallery-grid">
         {preview.map((image, i) => (
-          <div class="gallery__item">
+          <div
+            class="gallery__item"
+            data-lb-src={image.url}
+            data-lb-alt={image.alt || `${address.street} — photo ${i + 2}`}
+            data-lb-group="gallery"
+          >
             <img
               src={image.url}
               alt={image.alt || `${address.street} — photo ${i + 2}`}
@@ -52,14 +62,23 @@ const totalRemaining = overflow.length;
         ))}
 
         {totalRemaining > 0 && (
-          <button class="gallery__more-tile" id="gallery-more-btn" aria-label={`Show ${totalRemaining} more photos`}>
+          <button
+            class="gallery__more-tile"
+            id="gallery-more-btn"
+            aria-label={`Show ${totalRemaining} more photos`}
+          >
             <span class="gallery__more-num">+{totalRemaining}</span>
             <span class="gallery__more-label">More Photos</span>
           </button>
         )}
 
         {overflow.map((image, i) => (
-          <div class="gallery__item gallery__item--hidden">
+          <div
+            class="gallery__item gallery__item--hidden"
+            data-lb-src={image.url}
+            data-lb-alt={image.alt || `${address.street} — photo ${i + 10}`}
+            data-lb-group="gallery"
+          >
             <img
               src={image.url}
               alt={image.alt || `${address.street} — photo ${i + 10}`}
@@ -73,18 +92,6 @@ const totalRemaining = overflow.length;
       </div>
     )}
 
-    <!-- Expand gallery script -->
-    <script>
-      const btn = document.getElementById('gallery-more-btn');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          const hidden = document.querySelectorAll<HTMLElement>('.gallery__item--hidden');
-          hidden.forEach(el => el.classList.remove('gallery__item--hidden'));
-          btn.remove();
-        });
-      }
-    </script>
-
     <!-- Section label below the imagery -->
     <div class="gallery__footer container">
       <span class="section-label">Photo Tour</span>
@@ -93,6 +100,22 @@ const totalRemaining = overflow.length;
 
   </section>
 )}
+
+<!--
+  Script is intentionally outside the conditional so Astro processes it
+  as a module script (TypeScript compiled, deferred). The btn check makes
+  it safe when the gallery section is absent.
+-->
+<script>
+  const btn = document.getElementById('gallery-more-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.gallery__item--hidden')
+        .forEach(el => el.classList.remove('gallery__item--hidden'));
+      btn.remove();
+    });
+  }
+</script>
 
 <style lang="scss">
   @use '../styles/variables' as *;
@@ -107,6 +130,7 @@ const totalRemaining = overflow.length;
       height: 70vh;
       min-height: 480px;
       overflow: hidden;
+      cursor: pointer;
 
       img {
         width: 100%;
@@ -114,6 +138,7 @@ const totalRemaining = overflow.length;
         object-fit: cover;
         display: block;
         transition: transform $transition-slow;
+        pointer-events: none;
       }
 
       &:hover img {
@@ -130,6 +155,7 @@ const totalRemaining = overflow.length;
       background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
       display: flex;
       justify-content: flex-end;
+      pointer-events: none;
     }
 
     &__count {
@@ -172,6 +198,7 @@ const totalRemaining = overflow.length;
         height: 100%;
         object-fit: cover;
         transition: transform $transition-slow, opacity $transition-base;
+        pointer-events: none;
       }
 
       &:hover img {
@@ -192,6 +219,7 @@ const totalRemaining = overflow.length;
       letter-spacing: 0.04em;
       transform: translateY(100%);
       transition: transform $transition-base;
+      pointer-events: none;
 
       .gallery__item:hover & {
         transform: translateY(0);

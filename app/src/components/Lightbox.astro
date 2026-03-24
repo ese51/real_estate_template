@@ -1,0 +1,196 @@
+---
+// Global image lightbox.
+// Any element with [data-lb-src] opens this overlay on click.
+// Elements sharing the same [data-lb-group] value navigate as a set.
+---
+
+<div id="lb" class="lb" hidden aria-modal="true" role="dialog" aria-label="Photo viewer">
+  <button class="lb__close" id="lb-close" aria-label="Close photo viewer">✕</button>
+  <button class="lb__nav lb__prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+  <div class="lb__stage" id="lb-stage">
+    <img class="lb__img" id="lb-img" src="" alt="" />
+  </div>
+  <button class="lb__nav lb__next" id="lb-next" aria-label="Next photo">&#8250;</button>
+  <span class="lb__counter" id="lb-counter"></span>
+</div>
+
+<script>
+  (function () {
+    const lb      = document.getElementById('lb') as HTMLElement;
+    const imgEl   = document.getElementById('lb-img') as HTMLImageElement;
+    const stage   = document.getElementById('lb-stage') as HTMLElement;
+    const closeBtn = document.getElementById('lb-close') as HTMLButtonElement;
+    const prevBtn  = document.getElementById('lb-prev') as HTMLButtonElement;
+    const nextBtn  = document.getElementById('lb-next') as HTMLButtonElement;
+    const counter  = document.getElementById('lb-counter') as HTMLElement;
+
+    let items: { src: string; alt: string }[] = [];
+    let idx = 0;
+
+    function show(i: number) {
+      idx = ((i % items.length) + items.length) % items.length;
+      imgEl.src  = items[idx].src;
+      imgEl.alt  = items[idx].alt;
+      counter.textContent = items.length > 1 ? `${idx + 1} / ${items.length}` : '';
+      prevBtn.hidden = items.length <= 1;
+      nextBtn.hidden = items.length <= 1;
+    }
+
+    function open(group: string, startIdx: number) {
+      const nodes = Array.from(
+        document.querySelectorAll<HTMLElement>(`[data-lb-group="${group}"]`)
+      );
+      items = nodes.map(el => ({
+        src: el.dataset.lbSrc ?? '',
+        alt: el.dataset.lbAlt ?? '',
+      }));
+      show(startIdx);
+      lb.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+      lb.hidden = true;
+      imgEl.src = '';
+      document.body.style.overflow = '';
+    }
+
+    closeBtn.addEventListener('click', close);
+    prevBtn.addEventListener('click', () => show(idx - 1));
+    nextBtn.addEventListener('click', () => show(idx + 1));
+
+    // Click the backdrop (not the image) to close
+    lb.addEventListener('click', (e) => {
+      if (e.target === lb || e.target === stage) close();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (lb.hidden) return;
+      if (e.key === 'Escape')      close();
+      if (e.key === 'ArrowLeft')   show(idx - 1);
+      if (e.key === 'ArrowRight')  show(idx + 1);
+    });
+
+    // Global delegation — wire every [data-lb-src] element on the page
+    document.addEventListener('click', (e) => {
+      const trigger = (e.target as HTMLElement).closest<HTMLElement>('[data-lb-src]');
+      if (!trigger) return;
+      const group = trigger.dataset.lbGroup ?? '__solo';
+      const peers = Array.from(
+        document.querySelectorAll<HTMLElement>(`[data-lb-group="${group}"]`)
+      );
+      open(group, Math.max(0, peers.indexOf(trigger)));
+    });
+  })();
+</script>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .lb {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+
+    &[hidden] { display: none; }
+
+    &__stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: min(90vw, 1400px);
+      max-height: 85vh;
+      // Clicking the stage area (not the image itself) closes
+      cursor: default;
+    }
+
+    &__img {
+      max-width: min(90vw, 1400px);
+      max-height: 85vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 2px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+      display: block;
+      cursor: default;
+      pointer-events: none; // clicks fall through to stage → backdrop close
+    }
+
+    &__close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.5rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.4);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      z-index: 1;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #fff;
+      }
+    }
+
+    &__nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.4);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      z-index: 1;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #fff;
+      }
+
+      &[hidden] { display: none; }
+    }
+
+    &__prev { left: 1.5rem; }
+    &__next { right: 1.5rem; }
+
+    &__counter {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+  }
+</style>

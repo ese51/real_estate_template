@@ -35,7 +35,12 @@ const { floor_plans, address } = property;
                 )}
               </div>
             </div>
-            <div class="plans__img-wrap">
+            <div
+              class="plans__img-wrap"
+              data-lb-src={plan.image}
+              data-lb-alt={`${plan.name} floor plan — ${address.street}`}
+              data-lb-group="plans"
+            >
               <img
                 src={plan.image}
                 alt={`${plan.name} floor plan — ${address.street}`}
@@ -138,12 +143,14 @@ const { floor_plans, address } = property;
       align-items: center;
       justify-content: center;
       padding: 2rem;
+      cursor: pointer;
 
       img {
         width: 100%;
         max-height: 320px;
         object-fit: contain;
         transition: transform $transition-slow;
+        pointer-events: none;
 
         .plans__item:hover & {
           transform: scale(1.02);

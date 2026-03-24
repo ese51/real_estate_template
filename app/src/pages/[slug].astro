@@ -25,6 +25,7 @@ import FloorPlans from '../components/FloorPlans.astro';
 import Contact from '../components/Contact.astro';
 import ScheduleShowing from '../components/ScheduleShowing.astro';
 import Footer from '../components/Footer.astro';
+import Lightbox from '../components/Lightbox.astro';
 
 export async function getStaticPaths() {
   const modules = import.meta.glob<{ default: PropertyData }>(
@@ -62,13 +63,14 @@ const { property } = Astro.props;
     <Hero property={property} />
     <PropertySummary property={property} />
     <About property={property} />
+    <Location property={property} />
     <Gallery property={property} />
     <Features property={property} />
     <Schools property={property} />
     <FloorPlans property={property} />
-    <Location property={property} />
     <Contact property={property} />
     <ScheduleShowing property={property} />
   </main>
   <Footer property={property} />
+  <Lightbox />
 </PropertyLayout>
