@@ -1,0 +1,63 @@
+---
+/**
+ * [slug].astro — Dynamic multi-listing route
+ *
+ * Generates one static page per JSON file found in src/data/properties/.
+ * The slug is derived from the filename (e.g. 1615-n-wakefield-arlington.json → /1615-n-wakefield-arlington).
+ *
+ * To add a new listing:
+ *   1. Add src/data/properties/[slug].json
+ *   2. Add app/public/images/[slug]/ with the listing's photos
+ *   3. Run the build — the page is generated automatically.
+ */
+
+import type { PropertyData } from '../types/property';
+import PropertyLayout from '../layouts/PropertyLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Gallery from '../components/Gallery.astro';
+import PropertySummary from '../components/PropertySummary.astro';
+import About from '../components/About.astro';
+import Features from '../components/Features.astro';
+import Schools from '../components/Schools.astro';
+import Location from '../components/Location.astro';
+import FloorPlans from '../components/FloorPlans.astro';
+import Contact from '../components/Contact.astro';
+import ScheduleShowing from '../components/ScheduleShowing.astro';
+import Footer from '../components/Footer.astro';
+
+export async function getStaticPaths() {
+  const modules = import.meta.glob<{ default: PropertyData }>(
+    '../data/properties/*.json',
+    { eager: true }
+  );
+
+  return Object.entries(modules).map(([filepath, mod]) => {
+    const slug = filepath.split('/').pop()!.replace('.json', '');
+    return { params: { slug }, props: { property: mod.default } };
+  });
+}
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+---
+
+<PropertyLayout property={property}>
+  <Header property={property} />
+  <main>
+    <Hero property={property} />
+    <PropertySummary property={property} />
+    <About property={property} />
+    <Gallery property={property} />
+    <Features property={property} />
+    <Schools property={property} />
+    <FloorPlans property={property} />
+    <Location property={property} />
+    <Contact property={property} />
+    <ScheduleShowing property={property} />
+  </main>
+  <Footer property={property} />
+</PropertyLayout>

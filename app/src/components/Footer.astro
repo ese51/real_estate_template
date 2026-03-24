@@ -1,0 +1,252 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { address, price_display, status, agent, schedule_showing } = property;
+const year = new Date().getFullYear();
+---
+
+<footer class="footer" aria-label="Site footer">
+
+  <div class="footer__main">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- Column 1: Property identity -->
+        <div class="footer__col footer__col--identity">
+          <p class="footer__status-pill">{status}</p>
+          <h2 class="footer__address">{address.street}</h2>
+          <p class="footer__city">{address.city}, {address.state} {address.zip}</p>
+          <p class="footer__price">{price_display}</p>
+          {schedule_showing.enabled && (
+            <a href="#schedule" class="footer__cta">Schedule a Tour</a>
+          )}
+        </div>
+
+        <!-- Column 2: Navigation -->
+        <nav class="footer__col footer__col--nav" aria-label="Footer links">
+          <span class="footer__col-label">On This Page</span>
+          <ul>
+            <li><a href="#about">About the Home</a></li>
+            <li><a href="#features">Features & Finishes</a></li>
+            <li><a href="#floor-plans">Floor Plans</a></li>
+            <li><a href="#schools">Nearby Schools</a></li>
+            <li><a href="#location">Location</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+
+        <!-- Column 3: Agent -->
+        <div class="footer__col footer__col--agent">
+          <span class="footer__col-label">Listing Agent</span>
+          <p class="footer__agent-name">{agent.name}</p>
+          {agent.brokerage && <p class="footer__agent-brokerage">{agent.brokerage}</p>}
+          <div class="footer__agent-contacts">
+            <a href={`tel:${agent.phone.replace(/\D/g, '')}`}>{agent.phone}</a>
+            <a href={`mailto:${agent.email}`}>{agent.email}</a>
+          </div>
+          {agent.license && <p class="footer__license">Lic. #{agent.license}</p>}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer__legal">
+    <div class="container">
+      <p class="footer__disclaimer">
+        All information deemed reliable but not guaranteed. Property data, measurements,
+        and descriptions are approximate and subject to change without notice.
+        This is not an offer to sell. Equal Housing Opportunity.
+      </p>
+      <p class="footer__copy">&copy; {year} {agent.brokerage || agent.name}</p>
+    </div>
+  </div>
+
+</footer>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+  @use 'sass:color';
+
+  .footer {
+    &__main {
+      background: $color-primary;
+      padding: $space-xl $space-md;
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: $space-xl;
+
+      @media (max-width: $bp-lg) {
+        grid-template-columns: 1fr 1fr;
+        gap: $space-lg;
+      }
+
+      @media (max-width: $bp-sm) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &__col {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    &__col-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 1.25rem;
+    }
+
+    // Identity column
+    &__status-pill {
+      display: inline-block;
+      width: fit-content;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: $color-primary;
+      background: $color-accent;
+      padding: 0.25rem 0.65rem;
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+
+    &__address {
+      font-family: $font-serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 400;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    &__city {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    &__price {
+      font-family: $font-serif;
+      font-size: 1.3rem;
+      color: $color-accent;
+      margin-bottom: 1.5rem;
+    }
+
+    &__cta {
+      display: inline-block;
+      width: fit-content;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: $color-primary;
+      background: $color-accent;
+      border-radius: 2px;
+      transition: background $transition-fast;
+
+      &:hover {
+        background: #fff;
+      }
+    }
+
+    // Nav column
+    &__col--nav {
+      ul {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      a {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.5);
+        transition: color $transition-fast;
+        letter-spacing: 0.02em;
+
+        &:hover {
+          color: rgba(255, 255, 255, 0.9);
+        }
+      }
+    }
+
+    // Agent column
+    &__agent-name {
+      font-family: $font-serif;
+      font-size: 1.15rem;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    &__agent-brokerage {
+      font-size: 0.78rem;
+      color: $color-accent;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    &__agent-contacts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+
+      a {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.55);
+        transition: color $transition-fast;
+
+        &:hover {
+          color: $color-accent;
+        }
+      }
+    }
+
+    &__license {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    // Legal strip
+    &__legal {
+      background: color.adjust($color-primary, $lightness: -4%);
+      padding: 1.25rem $space-md;
+
+      .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: $space-lg;
+        flex-wrap: wrap;
+      }
+    }
+
+    &__disclaimer {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.25);
+      line-height: 1.7;
+      max-width: 680px;
+    }
+
+    &__copy {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.2);
+      white-space: nowrap;
+    }
+  }
+</style>

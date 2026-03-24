@@ -1,0 +1,208 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { agent, address } = property;
+---
+
+<section class="contact section" id="contact" aria-label="Contact agent">
+  <div class="container">
+    <div class="contact__layout">
+
+      <div class="contact__intro">
+        <span class="section-label">Listed by</span>
+        <h2>Speak with the Listing Agent</h2>
+        <div class="divider"></div>
+        <p>
+          For more information, to arrange a private showing, or to submit an offer
+          on {address.street}, contact {agent.name} directly.
+        </p>
+      </div>
+
+      <div class="contact__card">
+
+        {agent.photo && (
+          <div class="contact__photo-wrap">
+            <img src={agent.photo} alt={`${agent.name} headshot`} class="contact__photo" />
+          </div>
+        )}
+
+        <div class="contact__agent">
+          <h3 class="contact__name">{agent.name}</h3>
+          {agent.title && <p class="contact__title">{agent.title}</p>}
+          {agent.brokerage && <p class="contact__brokerage">{agent.brokerage}</p>}
+        </div>
+
+        <div class="contact__divider" aria-hidden="true"></div>
+
+        <div class="contact__methods">
+          <a href={`tel:${agent.phone.replace(/\D/g, '')}`} class="contact__method">
+            <span class="contact__method-type">Phone</span>
+            <span class="contact__method-value">{agent.phone}</span>
+          </a>
+          <a
+            href={`mailto:${agent.email}?subject=Inquiry: ${address.full}`}
+            class="contact__method"
+          >
+            <span class="contact__method-type">Email</span>
+            <span class="contact__method-value">{agent.email}</span>
+          </a>
+        </div>
+
+        {agent.license && (
+          <p class="contact__license">License #{agent.license}</p>
+        )}
+
+        {agent.demo_disclaimer && (
+          <p class="contact__demo-note">{agent.demo_disclaimer}</p>
+        )}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .contact {
+    background: $color-bg;
+
+    &__layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: $space-2xl;
+      align-items: center;
+
+      @media (max-width: $bp-lg) {
+        grid-template-columns: 1fr;
+        gap: $space-lg;
+      }
+    }
+
+    &__intro {
+      h2 {
+        margin-top: 0.5rem;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+      }
+
+      p {
+        margin-top: 1.5rem;
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: $color-text-muted;
+        max-width: 460px;
+      }
+    }
+
+    &__card {
+      background: $color-primary;
+      border-radius: 2px;
+      padding: 2rem;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    &__photo-wrap {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba($color-accent, 0.5);
+      margin-bottom: 1.25rem;
+    }
+
+    &__photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &__agent {
+      margin-bottom: 1.5rem;
+    }
+
+    &__name {
+      font-family: $font-serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    &__title {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 0.15rem;
+    }
+
+    &__brokerage {
+      font-size: 0.78rem;
+      color: $color-accent;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    &__divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 1.5rem 0;
+    }
+
+    &__methods {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    &__method {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 1.1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 2px;
+      transition: background $transition-fast, border-color $transition-fast;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    &__method-type {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: $color-accent;
+    }
+
+    &__method-value {
+      font-size: 0.92rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    &__license {
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.22);
+      text-align: center;
+      margin-top: 1.25rem;
+    }
+
+    &__demo-note {
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.18);
+      line-height: 1.6;
+      text-align: center;
+      margin-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 1rem;
+    }
+  }
+</style>

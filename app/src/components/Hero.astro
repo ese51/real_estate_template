@@ -1,0 +1,291 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { address, price_display, stats, gallery } = property;
+
+// ─── Curated carousel selection ───────────────────────────────────────────────
+// Priority order: strong exterior first, then key interior spaces.
+// Bathrooms, extras, and floor plans are intentionally excluded.
+const CAROUSEL_PICKS = [
+  'exterior-front.webp',
+  'living-1.webp',
+  'kitchen-2.webp',
+  'dining-1.webp',
+  'exterior-back.webp',
+];
+
+const carouselImages = CAROUSEL_PICKS
+  .map(name => gallery.images.find(img => img.url.endsWith(name)))
+  .filter((img): img is NonNullable<typeof img> => !!img);
+
+// Fallback: single hero image if carousel can't be built
+const slides = carouselImages.length > 0
+  ? carouselImages
+  : gallery.hero_image
+    ? [{ url: gallery.hero_image, alt: address.street }]
+    : [];
+
+const hasSlides = slides.length > 0;
+---
+
+<section class="hero" id="hero" aria-label="Property hero">
+
+  <!-- ── Carousel layer ─────────────────────────────────────────── -->
+  {hasSlides && (
+    <div class="hero__carousel" aria-hidden="true">
+      {slides.map((img, i) => (
+        <div
+          class={`hero__slide${i === 0 ? ' is-active' : ''}`}
+          style={`background-image: url('${img.url}')`}
+        ></div>
+      ))}
+    </div>
+  )}
+
+  <!-- ── Top fade: nav readability only ───────────────────────── -->
+  <div class="hero__top-fade" aria-hidden="true"></div>
+
+  <!-- spacer pushes stats strip to the bottom -->
+  <div class="hero__spacer" aria-hidden="true"></div>
+
+  <!-- ── Stats strip ────────────────────────────────────────────── -->
+  <div class="hero__stats-strip">
+    <div class="container">
+      <div class="hero__stats">
+        <div class="hero__stat">
+          <span class="hero__stat-num">{price_display}</span>
+          <span class="hero__stat-label">List Price</span>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-num">{stats.beds}</span>
+          <span class="hero__stat-label">Bedrooms</span>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-num">{stats.baths}</span>
+          <span class="hero__stat-label">Bathrooms</span>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-num">{stats.sqft.toLocaleString()}</span>
+          <span class="hero__stat-label">Sq Ft</span>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <span class="hero__stat-num">{stats.year_built}</span>
+          <span class="hero__stat-label">Year Built</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dot indicators ─────────────────────────────────────────── -->
+  {slides.length > 1 && (
+    <div class="hero__dots" role="tablist" aria-label="Carousel controls">
+      {slides.map((_, i) => (
+        <button
+          class={`hero__dot${i === 0 ? ' is-active' : ''}`}
+          data-index={i}
+          role="tab"
+          aria-label={`Photo ${i + 1} of ${slides.length}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+        ></button>
+      ))}
+    </div>
+  )}
+
+</section>
+
+<!-- ── Carousel script ──────────────────────────────────────────── -->
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll<HTMLElement>('.hero__slide'));
+    const dots   = Array.from(document.querySelectorAll<HTMLElement>('.hero__dot'));
+    if (slides.length <= 1) return;
+
+    let current = 0;
+    let timer: ReturnType<typeof setInterval>;
+
+    function goTo(index: number) {
+      slides[current].classList.remove('is-active');
+      dots[current]?.classList.remove('is-active');
+      dots[current]?.setAttribute('aria-selected', 'false');
+      current = index;
+      slides[current].classList.add('is-active');
+      dots[current]?.classList.add('is-active');
+      dots[current]?.setAttribute('aria-selected', 'true');
+    }
+
+    function start() {
+      timer = setInterval(() => goTo((current + 1) % slides.length), 6000);
+    }
+
+    // Dot click: jump to slide and restart timer
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        clearInterval(timer);
+        goTo(i);
+        start();
+      });
+    });
+
+    start();
+  })();
+</script>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    // Dark fallback shown before images load or when no slides exist
+    background: #141420;
+    overflow: hidden;
+  }
+
+  // ── Carousel ─────────────────────────────────────────────────────
+
+  .hero__carousel {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero__slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    // Slightly longer than the JS interval to ensure seamless crossfade
+    transition: opacity 1.8s ease-in-out;
+
+    &.is-active {
+      opacity: 1;
+    }
+  }
+
+  // ── Gradient overlays ─────────────────────────────────────────────
+
+  // Top-of-page gradient — keeps nav text readable without dimming the image
+  .hero__top-fade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 180px;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.38) 0%,
+      rgba(0, 0, 0, 0.12) 55%,
+      transparent 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  // Spacer fills the middle, pushing the stats strip to the bottom
+  .hero__spacer {
+    flex: 1;
+  }
+
+  // ── Stats strip ──────────────────────────────────────────────────
+
+  .hero__stats-strip {
+    position: relative;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .hero__stats {
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .hero__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    padding: 1.3rem 2rem;
+    flex-shrink: 0;
+
+    @media (max-width: $bp-md) {
+      padding: 1.1rem 1.4rem;
+    }
+  }
+
+  .hero__stat-num {
+    font-family: $font-serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .hero__stat-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.42);
+    white-space: nowrap;
+  }
+
+  .hero__stat-sep {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    align-self: stretch;
+    flex-shrink: 0;
+  }
+
+  // ── Dot indicators ───────────────────────────────────────────────
+
+  .hero__dots {
+    position: absolute;
+    bottom: 84px; // just above the stats strip
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .hero__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.38);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+
+    &.is-active {
+      background: #fff;
+      transform: scale(1.4);
+    }
+
+    &:hover:not(.is-active) {
+      background: rgba(255, 255, 255, 0.65);
+    }
+  }
+
+</style>

@@ -1,0 +1,165 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { address, schedule_showing } = property;
+---
+
+<header class="header" id="header">
+  <div class="header__inner container">
+
+    <a href="#hero" class="header__brand" aria-label="Back to top">
+      <span class="header__street">{address.street}</span>
+      <span class="header__city">{address.city}, {address.state}</span>
+    </a>
+
+    <nav class="header__nav" aria-label="Page sections">
+      <a href="#about"       class="header__link">About</a>
+      <a href="#features"    class="header__link">Features</a>
+      <a href="#floor-plans" class="header__link">Plans</a>
+      <a href="#location"    class="header__link">Location</a>
+      <a href="#contact"     class="header__link">Contact</a>
+      {schedule_showing.enabled && (
+        <a href="#schedule" class="header__cta">Schedule a Tour</a>
+      )}
+    </nav>
+
+    <div class="header__mobile-cta">
+      {schedule_showing.enabled && (
+        <a href="#schedule" class="header__cta">Tour</a>
+      )}
+    </div>
+
+  </div>
+</header>
+
+<script>
+  const header = document.getElementById('header');
+  if (header) {
+    // Threshold: transition at 60px — just enough scroll to signal intent
+    const THRESHOLD = 60;
+    const onScroll = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > THRESHOLD);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+</script>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    // ── Transparent state (floating over hero) ──
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition:
+      background  0.4s ease,
+      border-color 0.4s ease,
+      box-shadow  0.4s ease;
+
+    // ── Scrolled state (solid, readable) ──
+    &.is-scrolled {
+      background: rgba(12, 12, 22, 0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 2px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    &__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    // ── Brand (address) ──
+    &__brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    &__street {
+      font-family: $font-serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 0.01em;
+    }
+
+    &__city {
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.42);
+    }
+
+    // ── Nav links ──
+    &__nav {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+
+      @media (max-width: $bp-lg) {
+        display: none;
+      }
+    }
+
+    &__link {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.62);
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+
+    // ── CTA button ──
+    &__cta {
+      display: inline-block;
+      padding: 0.52rem 1.25rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: $color-primary;
+      background: $color-accent;
+      border-radius: 2px;
+      transition: background 0.2s ease, transform 0.15s ease;
+
+      &:hover {
+        background: #fff;
+        transform: translateY(-1px);
+      }
+    }
+
+    // ── Mobile: show only CTA ──
+    &__mobile-cta {
+      display: none;
+
+      @media (max-width: $bp-lg) {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+</style>

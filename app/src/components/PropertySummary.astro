@@ -1,0 +1,175 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { stats, price_display, status, address } = property;
+
+const specs = [
+  { label: 'Beds',   value: stats.beds.toString() },
+  { label: 'Baths',  value: stats.baths.toString() },
+  { label: 'Sq Ft',  value: stats.sqft.toLocaleString() },
+];
+---
+
+<div class="summary" id="summary" aria-label="Property specifications">
+  <div class="summary__strip">
+    <div class="summary__inner">
+
+      <div class="summary__price-block">
+        <span class="summary__status">{status}</span>
+        <span class="summary__price">{price_display}</span>
+        <span class="summary__address">{address.full}</span>
+      </div>
+
+      <div class="summary__divider" aria-hidden="true"></div>
+
+      <div class="summary__specs">
+        {specs.map((spec, i) => (
+          <>
+            <div class="summary__spec">
+              <span class="summary__spec-value">{spec.value}</span>
+              <span class="summary__spec-label">{spec.label}</span>
+            </div>
+            {i < specs.length - 1 && (
+              <div class="summary__sep" aria-hidden="true"></div>
+            )}
+          </>
+        ))}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .summary {
+    position: sticky;
+    top: 72px; // height of header
+    z-index: 50;
+
+    &__strip {
+      background: #fff;
+      border-bottom: 1px solid $color-border;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+      overflow-x: auto;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__inner {
+      display: flex;
+      align-items: stretch;
+      min-height: 64px;
+      max-width: $container-max;
+      margin: 0 auto;
+      padding: 0 2rem;
+
+      @media (max-width: $bp-md) {
+        padding: 0 1rem;
+      }
+    }
+
+    &__price-block {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+      padding: 0.75rem 1.5rem 0.75rem 0;
+
+      @media (max-width: $bp-md) {
+        gap: 0.6rem;
+      }
+    }
+
+    &__status {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #fff;
+      background: $color-accent;
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    &__price {
+      font-family: $font-serif;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: $color-primary;
+      white-space: nowrap;
+    }
+
+    &__address {
+      font-size: 0.78rem;
+      color: $color-text-muted;
+      white-space: nowrap;
+
+      @media (max-width: $bp-lg) {
+        display: none;
+      }
+    }
+
+    &__divider {
+      width: 1px;
+      background: $color-border;
+      flex-shrink: 0;
+      margin: 0.75rem 0;
+    }
+
+    &__specs {
+      display: flex;
+      align-items: stretch;
+      flex: 1;
+      overflow-x: auto;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar { display: none; }
+    }
+
+    &__spec {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      padding: 0 1.75rem;
+      flex-shrink: 0;
+    }
+
+    &__spec-value {
+      font-family: $font-serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: $color-primary;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    &__spec-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: $color-text-muted;
+      white-space: nowrap;
+    }
+
+    &__sep {
+      width: 1px;
+      background: $color-border;
+      flex-shrink: 0;
+      margin: 0.75rem 0;
+    }
+  }
+</style>

@@ -1,0 +1,48 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Design Tokens
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Colors
+$color-primary:       #1a1a2e;   // deep navy — headers, nav, footer
+$color-accent:        #b8975a;   // warm gold — highlights, CTAs
+$color-text:          #2a2a2a;   // primary body text
+$color-text-muted:    #6b6b6b;   // secondary, labels, captions
+$color-bg:            #f9f8f5;   // warm off-white page background
+$color-bg-dark:       #1a1a2e;   // dark section backgrounds
+$color-bg-mid:        #f1ede6;   // light warm panels
+$color-border:        #e2ddd6;   // subtle dividers
+
+// Typography
+$font-serif:  'Playfair Display', Georgia, 'Times New Roman', serif;
+$font-sans:   'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+// Scale
+$container-max:       1300px;
+$container-narrow:    860px;
+
+// Spacing
+$space-xs:   0.5rem;
+$space-sm:   1rem;
+$space-md:   2rem;
+$space-lg:   4rem;
+$space-xl:   6rem;
+$space-2xl:  9rem;
+
+// Section padding
+$section-padding-y:   $space-xl;
+
+// Transitions
+$transition-fast:   0.2s ease;
+$transition-base:   0.35s ease;
+$transition-slow:   0.6s ease;
+
+// Shadows
+$shadow-sm:   0 1px 4px rgba(0, 0, 0, 0.06);
+$shadow-md:   0 4px 20px rgba(0, 0, 0, 0.10);
+$shadow-lg:   0 12px 48px rgba(0, 0, 0, 0.14);
+
+// Breakpoints
+$bp-sm:   640px;
+$bp-md:   768px;
+$bp-lg:   1024px;
+$bp-xl:   1280px;

@@ -1,0 +1,154 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { floor_plans, address } = property;
+---
+
+{floor_plans && floor_plans.length > 0 && (
+  <section class="plans section section--mid" id="floor-plans" aria-label="Floor plans">
+    <div class="container">
+
+      <div class="plans__header">
+        <div>
+          <span class="section-label">Layout &amp; Flow</span>
+          <h2>Floor Plans</h2>
+        </div>
+        <p class="plans__note">
+          {floor_plans.length}-level residence · {address.city}, {address.state}
+        </p>
+      </div>
+
+      <div class="plans__grid">
+        {floor_plans.map((plan, i) => (
+          <div class="plans__item">
+            <div class="plans__label-row">
+              <span class="plans__num">{String(i + 1).padStart(2, '0')}</span>
+              <div class="plans__label-text">
+                <h3 class="plans__name">{plan.name}</h3>
+                {plan.description && (
+                  <p class="plans__desc">{plan.description}</p>
+                )}
+              </div>
+            </div>
+            <div class="plans__img-wrap">
+              <img
+                src={plan.image}
+                alt={`${plan.name} floor plan — ${address.street}`}
+                loading="lazy"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  </section>
+)}
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .plans {
+    background: $color-bg;
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: $space-lg;
+      flex-wrap: wrap;
+      gap: $space-sm;
+
+      h2 {
+        margin-top: 0.5rem;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+      }
+    }
+
+    &__note {
+      font-size: 0.85rem;
+      color: $color-text-muted;
+      align-self: flex-end;
+      padding-bottom: 0.3rem;
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: $space-lg;
+
+      @media (max-width: $bp-md) {
+        grid-template-columns: 1fr;
+        gap: $space-md;
+      }
+    }
+
+    &__item {
+      border: 1px solid $color-border;
+      border-radius: 2px;
+      overflow: hidden;
+      background: #fff;
+      transition: box-shadow $transition-base;
+
+      &:hover {
+        box-shadow: $shadow-lg;
+      }
+    }
+
+    &__label-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem 1.75rem;
+      border-bottom: 1px solid $color-border;
+    }
+
+    &__num {
+      font-family: $font-serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      color: rgba($color-primary, 0.12);
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: -0.1rem;
+    }
+
+    &__name {
+      font-family: $font-serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: $color-primary;
+      margin-bottom: 0.25rem;
+    }
+
+    &__desc {
+      font-size: 0.82rem;
+      color: $color-text-muted;
+      line-height: 1.55;
+    }
+
+    &__img-wrap {
+      background: $color-bg-mid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+
+      img {
+        width: 100%;
+        max-height: 320px;
+        object-fit: contain;
+        transition: transform $transition-slow;
+
+        .plans__item:hover & {
+          transform: scale(1.02);
+        }
+      }
+    }
+  }
+</style>

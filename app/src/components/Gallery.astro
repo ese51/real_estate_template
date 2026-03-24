@@ -1,0 +1,248 @@
+---
+// Conditional section — only renders when gallery.images has entries
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { gallery, address } = property;
+
+const images = gallery.images ?? [];
+const featured = images[0];
+const preview = images.slice(1, 9); // up to 8 shown initially
+const overflow = images.slice(9);   // revealed on click
+const totalRemaining = overflow.length;
+---
+
+{images.length > 0 && (
+  <section class="gallery" id="gallery" aria-label="Property gallery">
+
+    <!-- Featured image: full width, tall -->
+    {featured && (
+      <div class="gallery__featured">
+        <img
+          src={featured.url}
+          alt={featured.alt || `${address.street} — featured`}
+          loading="eager"
+        />
+        <div class="gallery__featured-overlay">
+          <span class="gallery__count">
+            {images.length} {images.length === 1 ? 'Photo' : 'Photos'}
+          </span>
+        </div>
+      </div>
+    )}
+
+    <!-- Grid of remaining images -->
+    {preview.length > 0 && (
+      <div class="gallery__grid container" id="gallery-grid">
+        {preview.map((image, i) => (
+          <div class="gallery__item">
+            <img
+              src={image.url}
+              alt={image.alt || `${address.street} — photo ${i + 2}`}
+              loading="lazy"
+            />
+            {image.caption && (
+              <span class="gallery__caption">{image.caption}</span>
+            )}
+          </div>
+        ))}
+
+        {totalRemaining > 0 && (
+          <button class="gallery__more-tile" id="gallery-more-btn" aria-label={`Show ${totalRemaining} more photos`}>
+            <span class="gallery__more-num">+{totalRemaining}</span>
+            <span class="gallery__more-label">More Photos</span>
+          </button>
+        )}
+
+        {overflow.map((image, i) => (
+          <div class="gallery__item gallery__item--hidden">
+            <img
+              src={image.url}
+              alt={image.alt || `${address.street} — photo ${i + 10}`}
+              loading="lazy"
+            />
+            {image.caption && (
+              <span class="gallery__caption">{image.caption}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- Expand gallery script -->
+    <script>
+      const btn = document.getElementById('gallery-more-btn');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const hidden = document.querySelectorAll<HTMLElement>('.gallery__item--hidden');
+          hidden.forEach(el => el.classList.remove('gallery__item--hidden'));
+          btn.remove();
+        });
+      }
+    </script>
+
+    <!-- Section label below the imagery -->
+    <div class="gallery__footer container">
+      <span class="section-label">Photo Tour</span>
+      <h2 class="gallery__heading">{address.street}</h2>
+    </div>
+
+  </section>
+)}
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .gallery {
+    background: $color-primary;
+    padding-bottom: $space-xl;
+
+    &__featured {
+      position: relative;
+      width: 100%;
+      height: 70vh;
+      min-height: 480px;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform $transition-slow;
+      }
+
+      &:hover img {
+        transform: scale(1.03);
+      }
+    }
+
+    &__featured-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 2rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    &__count {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+      padding: 0.4rem 0.85rem;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      backdrop-filter: blur(4px);
+    }
+
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding-top: 4px;
+
+      @media (max-width: $bp-lg) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      @media (max-width: $bp-sm) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    &__item {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.04);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform $transition-slow, opacity $transition-base;
+      }
+
+      &:hover img {
+        transform: scale(1.06);
+        opacity: 0.85;
+      }
+    }
+
+    &__caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.6rem 0.85rem;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      color: rgba(255,255,255,0.85);
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      transform: translateY(100%);
+      transition: transform $transition-base;
+
+      .gallery__item:hover & {
+        transform: translateY(0);
+      }
+    }
+
+    &__item--hidden {
+      display: none;
+    }
+
+    &__more-tile {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: background $transition-fast;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    &__more-num {
+      font-family: $font-serif;
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1;
+    }
+
+    &__more-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    &__footer {
+      padding-top: $space-lg;
+
+      h2 {
+        color: rgba(255, 255, 255, 0.9);
+        margin-top: 0.5rem;
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+      }
+    }
+  }
+</style>

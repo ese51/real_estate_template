@@ -1,0 +1,246 @@
+---
+import type { PropertyData } from '../types/property';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { schedule_showing, address, agent } = property;
+---
+
+{schedule_showing.enabled && (
+  <section class="schedule section section--mid" id="schedule" aria-label="Schedule a showing">
+    <div class="container">
+      <div class="schedule__layout">
+
+        <div class="schedule__intro">
+          <span class="section-label">Private Tours</span>
+          <h2>Schedule a Showing</h2>
+          <div class="divider"></div>
+          <p>
+            Experience {address.street} in person. Tours are by private appointment only.
+            Contact {agent.name} to arrange a time that works for you.
+          </p>
+        </div>
+
+        <div class="schedule__form-wrap">
+
+          {schedule_showing.calendly_url ? (
+            <div class="schedule__calendly">
+              <div
+                class="calendly-inline-widget"
+                data-url={schedule_showing.calendly_url}
+                style="min-width:320px;height:630px;"
+              ></div>
+              <script async src="https://assets.calendly.com/assets/external/widget.js" is:inline></script>
+            </div>
+          ) : (
+            <form
+              class="schedule__form"
+              name="showing-request"
+              method="POST"
+              data-netlify="true"
+              novalidate
+            >
+              <input type="hidden" name="form-name" value="showing-request" />
+              <input type="hidden" name="property" value={address.full} />
+
+              <div class="schedule__row">
+                <label class="schedule__field">
+                  <span class="schedule__field-label">First Name <abbr title="required">*</abbr></span>
+                  <input type="text" name="first_name" required autocomplete="given-name" />
+                </label>
+                <label class="schedule__field">
+                  <span class="schedule__field-label">Last Name <abbr title="required">*</abbr></span>
+                  <input type="text" name="last_name" required autocomplete="family-name" />
+                </label>
+              </div>
+
+              <div class="schedule__row">
+                <label class="schedule__field">
+                  <span class="schedule__field-label">Email <abbr title="required">*</abbr></span>
+                  <input type="email" name="email" required autocomplete="email" />
+                </label>
+                <label class="schedule__field">
+                  <span class="schedule__field-label">Phone</span>
+                  <input type="tel" name="phone" autocomplete="tel" />
+                </label>
+              </div>
+
+              <label class="schedule__field">
+                <span class="schedule__field-label">Preferred Date & Time</span>
+                <input
+                  type="text"
+                  name="preferred_time"
+                  placeholder="e.g., Weekday afternoons, Saturday mornings"
+                />
+              </label>
+
+              <label class="schedule__field">
+                <span class="schedule__field-label">Message</span>
+                <textarea name="message" rows="3" placeholder="Any questions about the property?"></textarea>
+              </label>
+
+              <button type="submit" class="schedule__submit">
+                Request a Private Showing
+              </button>
+
+              <p class="schedule__demo-msg" id="schedule-demo-msg" hidden>
+                This is a demo form. In a live version, inquiries would go directly to the listing agent.
+              </p>
+            </form>
+          )}
+
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.schedule__form');
+  const msg = document.getElementById('schedule-demo-msg');
+  if (form && msg) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      msg.hidden = false;
+    });
+  }
+</script>
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+  @use 'sass:color';
+
+  .schedule {
+    &__layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: $space-2xl;
+      align-items: start;
+
+      @media (max-width: $bp-lg) {
+        grid-template-columns: 1fr;
+        gap: $space-lg;
+      }
+    }
+
+    &__intro {
+      position: sticky;
+      top: 150px;
+
+      @media (max-width: $bp-lg) {
+        position: static;
+      }
+
+      h2 {
+        margin-top: 0.5rem;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+      }
+
+      p {
+        margin-top: 1.5rem;
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: $color-text-muted;
+      }
+    }
+
+    &__form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    &__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+
+      @media (max-width: $bp-sm) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    &__field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    &__field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: $color-text-muted;
+
+      abbr {
+        text-decoration: none;
+        color: $color-accent;
+        margin-left: 1px;
+      }
+    }
+
+    input, textarea {
+      padding: 0.85rem 1rem;
+      border: 1.5px solid $color-border;
+      border-radius: 2px;
+      font-family: $font-sans;
+      font-size: 0.95rem;
+      color: $color-text;
+      background: #fff;
+      transition: border-color $transition-fast, box-shadow $transition-fast;
+      resize: vertical;
+      width: 100%;
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+        box-shadow: 0 0 0 3px rgba($color-primary, 0.06);
+      }
+
+      &::placeholder {
+        color: color.adjust($color-text-muted, $lightness: 20%);
+      }
+    }
+
+    &__demo-msg {
+      font-size: 0.82rem;
+      color: $color-text-muted;
+      line-height: 1.6;
+      padding: 0.85rem 1rem;
+      border: 1px solid $color-border;
+      border-radius: 2px;
+      background: rgba($color-accent, 0.04);
+    }
+
+    &__submit {
+      align-self: flex-start;
+      display: inline-block;
+      padding: 1rem 2.25rem;
+      font-family: $font-sans;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #fff;
+      background: $color-primary;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background $transition-fast, transform $transition-fast;
+      margin-top: 0.5rem;
+
+      &:hover {
+        background: color.adjust($color-primary, $lightness: 6%);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+</style>

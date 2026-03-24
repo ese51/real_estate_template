@@ -1,0 +1,39 @@
+---
+import type { PropertyData } from '../types/property';
+import '../styles/global.scss';
+
+interface Props {
+  property: PropertyData;
+}
+
+const { property } = Astro.props;
+const { meta, address } = property;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={meta.site_description} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={meta.site_title} />
+    <meta property="og:description" content={meta.site_description} />
+    {meta.og_image && <meta property="og:image" content={meta.og_image} />}
+    <meta property="og:type" content="website" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href={Astro.url.href} />
+
+    <title>{meta.site_title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
