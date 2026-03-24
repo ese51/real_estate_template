@@ -3,10 +3,10 @@
  * [slug].astro — Dynamic multi-listing route
  *
  * Generates one static page per JSON file found in src/data/properties/.
- * The slug is derived from the filename (e.g. 1615-n-wakefield-arlington.json → /1615-n-wakefield-arlington).
+ * The route slug comes from property.meta.slug, not the filename.
  *
  * To add a new listing:
- *   1. Add src/data/properties/[slug].json
+ *   1. Add src/data/properties/[any-name].json with meta.slug set
  *   2. Add app/public/images/[slug]/ with the listing's photos
  *   3. Run the build — the page is generated automatically.
  */
@@ -27,14 +27,28 @@ import ScheduleShowing from '../components/ScheduleShowing.astro';
 import Footer from '../components/Footer.astro';
 
 export async function getStaticPaths() {
+  // Absolute path from Vite project root (app/) — resolves identically
+  // in local dev and on Netlify. Relative paths can silently resolve to
+  // zero matches in some CI environments.
   const modules = import.meta.glob<{ default: PropertyData }>(
-    '../data/properties/*.json',
+    '/src/data/properties/*.json',
     { eager: true }
   );
 
-  return Object.entries(modules).map(([filepath, mod]) => {
-    const slug = filepath.split('/').pop()!.replace('.json', '');
-    return { params: { slug }, props: { property: mod.default } };
+  const entries = Object.values(modules);
+
+  if (entries.length === 0) {
+    throw new Error(
+      'No property JSON files found in src/data/properties/. ' +
+      'Add at least one listing JSON before building.'
+    );
+  }
+
+  return entries.map((mod) => {
+    const property = mod.default;
+    // Slug comes from the data, not the filename — stays correct
+    // even if the file is renamed.
+    return { params: { slug: property.meta.slug }, props: { property } };
   });
 }
 
