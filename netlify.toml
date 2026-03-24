@@ -2,3 +2,8 @@
   base    = "app"
   command = "npm run build"
   publish = "dist"
+
+[[redirects]]
+  from   = "/1615-n-wakefield-arlington"
+  to     = "/wakefield"
+  status = 301
