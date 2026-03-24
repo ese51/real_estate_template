@@ -14,9 +14,9 @@ app/dist/
 app/.astro/
 
 # Raw source — not needed for build/deploy
-# Canonical copies live in app/src/data/ and app/public/images/
+# Anchored to repo root so app/src/data/ is not affected
 Listings/
-data/
+/data/
 
 # Local working directories
 outputs/
