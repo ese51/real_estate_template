@@ -8,7 +8,22 @@ interface Props {
 const { property } = Astro.props;
 const { location, address } = property;
 
+const STATE_NAMES: Record<string, string> = {
+  MD: 'Maryland',
+  VA: 'Virginia',
+  DC: 'District of Columbia',
+  PA: 'Pennsylvania',
+  NY: 'New York',
+  FL: 'Florida',
+  CA: 'California',
+  TX: 'Texas',
+};
+
+const stateName = STATE_NAMES[address.state] ?? address.state;
+const situatedIn = `Situated in ${address.city}, ${stateName}`;
+
 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.full)}`;
+const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address.full)}&output=embed&z=15`;
 ---
 
 <section class="location section" id="location" aria-label="Location">
@@ -17,8 +32,8 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
       <div class="location__layout">
 
         <div class="location__text">
-          <span class="section-label">Neighborhood</span>
-          <h2>{location.neighborhood}</h2>
+          <span class="section-label">Location</span>
+          <h2>{situatedIn}</h2>
           <div class="divider"></div>
           <p class="location__address">{address.full}</p>
 
@@ -41,26 +56,18 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
           </a>
         </div>
 
-        <div class="location__map-panel" aria-hidden="true">
-          <div class="location__map-placeholder">
-            <div class="location__map-address">
-              <span class="location__map-street">{address.street}</span>
-              <span class="location__map-city">{address.city}, {address.state} {address.zip}</span>
-            </div>
-            <div class="location__map-coords">
-              {location.lat.toFixed(4)}° N, {Math.abs(location.lng).toFixed(4)}° W
-            </div>
-          </div>
-          <!-- Swap for Google Maps or Mapbox iframe when ready -->
-          <!--
+        <div class="location__map-panel">
           <iframe
-            src="https://maps.google.com/maps?q={address.full}&output=embed"
+            src={embedUrl}
             width="100%"
             height="100%"
-            frameborder="0"
-            title="Property location map"
+            style="border:0;"
+            allowfullscreen={false}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title={`Map showing ${address.full}`}
+            scrolling="no"
           ></iframe>
-          -->
         </div>
 
       </div>
@@ -149,67 +156,21 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
     }
 
     &__map-panel {
-      height: 500px;
-      border-radius: 2px;
+      height: 420px;
+      border-radius: 6px;
       overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.08);
 
-      @media (max-width: $bp-lg) {
-        height: 300px;
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
       }
-    }
 
-    &__map-placeholder {
-      width: 100%;
-      height: 100%;
-      background:
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 39px,
-          rgba(255,255,255,0.03) 39px,
-          rgba(255,255,255,0.03) 40px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 39px,
-          rgba(255,255,255,0.03) 39px,
-          rgba(255,255,255,0.03) 40px
-        ),
-        linear-gradient(135deg, #0e0e1e 0%, #1a1a30 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-    }
-
-    &__map-address {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-
-    &__map-street {
-      font-family: $font-serif;
-      font-size: 1.5rem;
-      color: rgba(255, 255, 255, 0.55);
-    }
-
-    &__map-city {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.3);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    &__map-coords {
-      font-size: 0.7rem;
-      font-family: monospace;
-      color: rgba($color-accent, 0.5);
-      letter-spacing: 0.05em;
+      @media (max-width: $bp-lg) {
+        height: 320px;
+      }
     }
   }
 </style>

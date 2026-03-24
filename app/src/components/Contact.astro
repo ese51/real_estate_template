@@ -25,16 +25,19 @@ const { agent, address } = property;
 
       <div class="contact__card">
 
-        {agent.photo && (
-          <div class="contact__photo-wrap">
-            <img src={agent.photo} alt={`${agent.name} headshot`} class="contact__photo" />
+        <div class="contact__agent-row">
+          <div class="contact__agent">
+            <span class="contact__listed-by">Listed by</span>
+            <h3 class="contact__name">{agent.name}</h3>
+            {agent.title && <p class="contact__title">{agent.title}</p>}
+            {agent.brokerage && <p class="contact__brokerage">{agent.brokerage}</p>}
           </div>
-        )}
 
-        <div class="contact__agent">
-          <h3 class="contact__name">{agent.name}</h3>
-          {agent.title && <p class="contact__title">{agent.title}</p>}
-          {agent.brokerage && <p class="contact__brokerage">{agent.brokerage}</p>}
+          {agent.photo && (
+            <div class="contact__photo-wrap">
+              <img src={agent.photo} alt={`${agent.name} headshot`} class="contact__photo" />
+            </div>
+          )}
         </div>
 
         <div class="contact__divider" aria-hidden="true"></div>
@@ -106,13 +109,21 @@ const { agent, address } = property;
       box-shadow: 0 8px 40px rgba(0, 0, 0, 0.16);
     }
 
+    &__agent-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
     &__photo-wrap {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
+      flex-shrink: 0;
+      width: 88px;
+      height: 88px;
+      border-radius: 6px;
       overflow: hidden;
-      border: 2px solid rgba($color-accent, 0.5);
-      margin-bottom: 1.25rem;
+      border: 1px solid rgba($color-accent, 0.35);
     }
 
     &__photo {
@@ -122,7 +133,18 @@ const { agent, address } = property;
     }
 
     &__agent {
-      margin-bottom: 1.5rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    &__listed-by {
+      display: block;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: $color-accent;
+      margin-bottom: 0.4rem;
     }
 
     &__name {
