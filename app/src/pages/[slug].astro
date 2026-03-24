@@ -27,11 +27,8 @@ import ScheduleShowing from '../components/ScheduleShowing.astro';
 import Footer from '../components/Footer.astro';
 
 export async function getStaticPaths() {
-  // Absolute path from Vite project root (app/) — resolves identically
-  // in local dev and on Netlify. Relative paths can silently resolve to
-  // zero matches in some CI environments.
   const modules = import.meta.glob<{ default: PropertyData }>(
-    '/src/data/properties/*.json',
+    '../data/properties/*.json',
     { eager: true }
   );
 
