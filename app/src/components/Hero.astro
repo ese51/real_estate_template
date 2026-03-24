@@ -11,16 +11,20 @@ const { address, price_display, stats, gallery } = property;
 // ─── Curated carousel selection ───────────────────────────────────────────────
 // Priority order: strong exterior first, then key interior spaces.
 // Bathrooms, extras, and floor plans are intentionally excluded.
+// Match by basename without extension so .jpg and .webp both resolve.
 const CAROUSEL_PICKS = [
-  'exterior-front.webp',
-  'living-1.webp',
-  'kitchen-2.webp',
-  'dining-1.webp',
-  'exterior-back.webp',
+  'exterior-front',
+  'living-1',
+  'kitchen-2',
+  'dining-1',
+  'exterior-back',
 ];
 
 const carouselImages = CAROUSEL_PICKS
-  .map(name => gallery.images.find(img => img.url.endsWith(name)))
+  .map(base => gallery.images.find(img => {
+    const file = img.url.split('/').pop() ?? '';
+    return file.replace(/\.\w+$/, '') === base;
+  }))
   .filter((img): img is NonNullable<typeof img> => !!img);
 
 // Fallback: single hero image if carousel can't be built

@@ -1,0 +1,183 @@
+{
+  "_data_source": "Long & Foster Real Estate / BrightMLS",
+  "_data_source_url": "https://www.longandfoster.com/debbiemaloy/realestate/details/27388076/11940-river-road-potomac-md-20854/mdmc2211102",
+  "_data_last_verified": "2026-03-24",
+  "_mls": "MDMC2211102",
+  "_demo_note": "This is a demo property marketing site created to showcase an alternative listing presentation. It is not the official listing page. For official inquiries, contact the listing agent at Long & Foster.",
+
+  "meta": {
+    "slug": "11940river",
+    "site_title": "11940 River Road — Potomac, MD 20854",
+    "site_description": "Spectacular two-acre estate overlooking the Potomac River — 7 en-suite bedrooms, 11,575 sq ft, heated pool, pavilion, and glass gazebo. Listed at $4,000,000.",
+    "og_image": "/images/11940river/exterior-front.jpg"
+  },
+
+  "address": {
+    "street": "11940 River Road",
+    "city": "Potomac",
+    "state": "MD",
+    "zip": "20854",
+    "full": "11940 River Road, Potomac, MD 20854"
+  },
+
+  "price": 4000000,
+  "price_display": "$4,000,000",
+  "status": "For Sale",
+
+  "tagline": "A spectacular two-acre estate overlooking the Potomac River — 11,575 sq ft, seven en-suite bedrooms, and a resort-caliber amenity set on one of the area's most distinguished addresses.",
+
+  "description": "<p>Welcome to a spectacular two-acre estate overlooking the Potomac River. This architectural gem boasts 11,575 total square feet and seven en-suite bedrooms — one main level primary, four upper, and two lower — on three incredibly bright, sunlit levels. You will feel this home's warmth the moment you enter, with fantastic views of the outdoors directly from its entrance vestibule.</p><p>The main level delivers elegance and comfort in equal measure. Soaring ceilings in the great room create a sanctuary of light throughout the home. A caterer's kitchen serves large engagements with ease, and a cabana bath accommodates family and guests at the pool level. The sun-filled lower level is an entertainment retreat, featuring an expansive dual-sided social area with bar, game rooms, and a custom wine room for your private collection.</p><p>Step outside to grounds designed for both quiet relaxation and grand soirées. Enjoy a dip in the heated pool or unwind in the hot tub. Dine alfresco under the pavilion or gather in the stunning glass gazebo surrounded by nature. With easy access to the Nation's Capital, this estate offers ultimate privacy, convenience, and luxury in the heart of Potomac. Private showings by appointment only.</p>",
+
+  "stats": {
+    "beds": 7,
+    "baths": 9.5,
+    "sqft": 11575,
+    "lot_size": "2.00 acres (87,120 sq ft)",
+    "year_built": 1989,
+    "garage": "3-car garage",
+    "style": "Contemporary Estate"
+  },
+
+  "gallery": {
+    "hero_image": "/images/11940river/exterior-front.jpg",
+    "images": [
+      { "url": "/images/11940river/exterior-front.jpg",    "alt": "Front exterior", "caption": "Circular driveway entry" },
+      { "url": "/images/11940river/living-1.jpg",          "alt": "Great room", "caption": "Two-story great room" },
+      { "url": "/images/11940river/living-2.jpg",          "alt": "Formal living room" },
+      { "url": "/images/11940river/living-3.jpg",          "alt": "Sitting room" },
+      { "url": "/images/11940river/foyer-1.jpg",           "alt": "Main foyer", "caption": "Grand marble foyer" },
+      { "url": "/images/11940river/foyer-2.jpg",           "alt": "Entry foyer with staircase" },
+      { "url": "/images/11940river/entry-1.jpg",           "alt": "Stone entry vestibule" },
+      { "url": "/images/11940river/entry-2.jpg",           "alt": "Entry foyer" },
+      { "url": "/images/11940river/kitchen-1.jpg",         "alt": "Chef's kitchen", "caption": "Caterer's kitchen" },
+      { "url": "/images/11940river/kitchen-2.jpg",         "alt": "Breakfast sunroom" },
+      { "url": "/images/11940river/kitchen-3.jpg",         "alt": "Kitchen — view 3" },
+      { "url": "/images/11940river/dining-1.jpg",          "alt": "Dining room", "caption": "Formal dining" },
+      { "url": "/images/11940river/exterior-back.jpg",     "alt": "Heated pool", "caption": "Heated pool and rear grounds" },
+      { "url": "/images/11940river/exterior-pavilion.jpg", "alt": "All-season pavilion", "caption": "Covered pavilion" },
+      { "url": "/images/11940river/exterior-spa.jpg",      "alt": "Hot tub", "caption": "Hot tub at dusk" },
+      { "url": "/images/11940river/exterior-patio.jpg",    "alt": "Outdoor kitchen and terrace" },
+      { "url": "/images/11940river/exterior-poolhouse.jpg","alt": "Glass gazebo" },
+      { "url": "/images/11940river/exterior-rear.jpg",     "alt": "Rear exterior" },
+      { "url": "/images/11940river/bedroom-1.jpg",         "alt": "Primary bedroom", "caption": "Main level primary suite" },
+      { "url": "/images/11940river/bedroom-2.jpg",         "alt": "Bedroom suite" },
+      { "url": "/images/11940river/bedroom-3.jpg",         "alt": "Bedroom suite — view 2" },
+      { "url": "/images/11940river/bedroom-4.jpg",         "alt": "Bedroom suite — view 3" },
+      { "url": "/images/11940river/bedroom-5.jpg",         "alt": "Bedroom suite — view 4" },
+      { "url": "/images/11940river/bathroom-1.jpg",        "alt": "Spa bath" },
+      { "url": "/images/11940river/bathroom-2.jpg",        "alt": "Bath — view 2" },
+      { "url": "/images/11940river/office-1.jpg",          "alt": "Library / office", "caption": "Private library" },
+      { "url": "/images/11940river/office-2.jpg",          "alt": "Office — view 2" },
+      { "url": "/images/11940river/office-3.jpg",          "alt": "Office — view 3" },
+      { "url": "/images/11940river/bar-1.jpg",             "alt": "Bar", "caption": "Custom bar" },
+      { "url": "/images/11940river/basement-1.jpg",        "alt": "Lower level", "caption": "Lower level entertainment" },
+      { "url": "/images/11940river/basement-2.jpg",        "alt": "Lower level — view 2" },
+      { "url": "/images/11940river/basement-3.jpg",        "alt": "Lower level — view 3" }
+    ]
+  },
+
+  "features": [
+    {
+      "category": "Architecture & Exterior",
+      "items": [
+        "Circular driveway on 2-acre lot with full privacy",
+        "Heated pool with cabana bath",
+        "Hot tub / spa",
+        "Covered alfresco dining pavilion",
+        "Stunning glass gazebo surrounded by nature",
+        "Sport court and play area",
+        "Outdoor kitchen with BBQ grill and extensive hardscape"
+      ]
+    },
+    {
+      "category": "Interior & Living",
+      "items": [
+        "11,575 sq ft across three sunlit levels",
+        "Soaring ceilings in great room — floor-to-ceiling windows",
+        "Two-story marble entry foyer with stone arch vestibule",
+        "Caterer's kitchen for large engagements",
+        "Formal dining room + breakfast area",
+        "Private library with fireplace and built-ins",
+        "Custom wine room",
+        "Sound system throughout"
+      ]
+    },
+    {
+      "category": "Bedrooms & Baths",
+      "items": [
+        "7 en-suite bedrooms — 1 main level primary, 4 upper, 2 lower",
+        "9 full baths + 1 half bath",
+        "Main level primary bedroom",
+        "Walk-in closets throughout",
+        "Jetted tub and walk-in shower in primary bath"
+      ]
+    },
+    {
+      "category": "Systems & Features",
+      "items": [
+        "Zoned heating and cooling — heat pump",
+        "Central vacuum",
+        "Water treatment system",
+        "3-car garage with asphalt circular driveway",
+        "Fully finished walkout basement",
+        "No HOA"
+      ]
+    }
+  ],
+
+  "schools": [
+    {
+      "name": "Potomac Elementary School",
+      "level": "Elementary",
+      "district": "Montgomery County Public Schools",
+      "rating": null,
+      "distance": null
+    },
+    {
+      "name": "Herbert Hoover Middle School",
+      "level": "Middle",
+      "district": "Montgomery County Public Schools",
+      "rating": null,
+      "distance": null
+    },
+    {
+      "name": "Winston Churchill High School",
+      "level": "High",
+      "district": "Montgomery County Public Schools",
+      "rating": null,
+      "distance": null
+    }
+  ],
+
+  "location": {
+    "lat": 39.03736,
+    "lng": -77.24794,
+    "neighborhood": "River Road corridor, Potomac",
+    "highlights": [
+      "Prestigious River Road address — 2-acre estate lot",
+      "Overlooking the Potomac River",
+      "Minutes to Potomac Village",
+      "Easy access to I-495 and downtown DC",
+      "Montgomery County Public Schools — Churchill cluster"
+    ]
+  },
+
+  "floor_plans": [],
+
+  "agent": {
+    "name": "Debbie Maloy",
+    "title": "Licensed Real Estate Agent",
+    "phone": "(202) 271-0458",
+    "email": "debbie.maloy@longandfoster.com",
+    "photo": null,
+    "brokerage": "Long & Foster Real Estate",
+    "license": null,
+    "demo_disclaimer": "This is a demo property marketing site created to showcase an alternative listing presentation. It is not the official listing page. For official inquiries, please contact the listing agent at Long & Foster."
+  },
+
+  "schedule_showing": {
+    "enabled": true,
+    "calendly_url": "",
+    "contact_form": true
+  }
+}
