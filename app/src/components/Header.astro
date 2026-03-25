@@ -17,6 +17,7 @@ const { address, schedule_showing } = property;
       <span class="header__city">{address.city}, {address.state}</span>
     </a>
 
+    <!-- Desktop nav — hidden on mobile via CSS -->
     <nav class="header__nav" aria-label="Page sections">
       <a href="#about"       class="header__link">About</a>
       <a href="#features"    class="header__link">Features</a>
@@ -28,25 +29,97 @@ const { address, schedule_showing } = property;
       )}
     </nav>
 
+    <!-- Mobile right-side controls: CTA + hamburger -->
     <div class="header__mobile-cta">
       {schedule_showing.enabled && (
         <a href="#schedule" class="header__cta">Tour</a>
       )}
+      <button
+        class="header__hamburger"
+        id="header-hamburger"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="header-mobile-menu"
+      >
+        <span class="header__ham-bar"></span>
+        <span class="header__ham-bar"></span>
+        <span class="header__ham-bar"></span>
+      </button>
     </div>
 
   </div>
+
+  <!-- Mobile dropdown menu — sits below the header bar, inside the fixed element -->
+  <nav
+    class="header__mobile-menu"
+    id="header-mobile-menu"
+    aria-label="Mobile navigation"
+  >
+    <div class="container">
+      <a href="#about"       class="header__mobile-link">About</a>
+      <a href="#features"    class="header__mobile-link">Features</a>
+      <a href="#floor-plans" class="header__mobile-link">Plans</a>
+      <a href="#location"    class="header__mobile-link">Location</a>
+      <a href="#contact"     class="header__mobile-link">Contact</a>
+      {schedule_showing.enabled && (
+        <a href="#schedule" class="header__mobile-link header__mobile-link--accent">
+          Schedule a Tour
+        </a>
+      )}
+    </div>
+  </nav>
+
 </header>
 
 <script>
-  const header = document.getElementById('header');
-  if (header) {
-    // Threshold: transition at 60px — just enough scroll to signal intent
-    const THRESHOLD = 60;
-    const onScroll = () => {
-      header.classList.toggle('is-scrolled', window.scrollY > THRESHOLD);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+  const header    = document.getElementById('header')!;
+  const hamburger = document.getElementById('header-hamburger') as HTMLButtonElement;
+  const menu      = document.getElementById('header-mobile-menu')!;
+
+  // ── Scroll state ────────────────────────────────────────────────────────────
+  const THRESHOLD = 60;
+  const syncScrollClass = () => {
+    header.classList.toggle('is-scrolled', window.scrollY > THRESHOLD);
+  };
+  window.addEventListener('scroll', syncScrollClass, { passive: true });
+  syncScrollClass();
+
+  // ── Hamburger toggle ────────────────────────────────────────────────────────
+  if (hamburger && menu) {
+    function openMenu() {
+      menu.classList.add('is-open');
+      hamburger.classList.add('is-open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      // Keep header solid while menu is open regardless of scroll position
+      header.classList.add('is-scrolled');
+    }
+
+    function closeMenu() {
+      menu.classList.remove('is-open');
+      hamburger.classList.remove('is-open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      // Restore scroll-driven header state
+      syncScrollClass();
+    }
+
+    hamburger.addEventListener('click', () => {
+      menu.classList.contains('is-open') ? closeMenu() : openMenu();
+    });
+
+    // Close on any link click — menu closes, then native anchor scroll takes over
+    menu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    });
+
+    // Close on click outside the header
+    document.addEventListener('click', (e) => {
+      if (!header.contains(e.target as Node)) closeMenu();
+    });
   }
 </script>
 
@@ -109,7 +182,7 @@ const { address, schedule_showing } = property;
       color: rgba(255, 255, 255, 0.42);
     }
 
-    // ── Nav links ──
+    // ── Desktop nav links ──
     &__nav {
       display: flex;
       align-items: center;
@@ -133,7 +206,7 @@ const { address, schedule_showing } = property;
       }
     }
 
-    // ── CTA button ──
+    // ── CTA button (used in both desktop nav and mobile bar) ──
     &__cta {
       display: inline-block;
       padding: 0.52rem 1.25rem;
@@ -152,13 +225,130 @@ const { address, schedule_showing } = property;
       }
     }
 
-    // ── Mobile: show only CTA ──
+    // ── Mobile right-side controls: Tour CTA + hamburger ──
     &__mobile-cta {
       display: none;
 
       @media (max-width: $bp-lg) {
         display: flex;
         align-items: center;
+        gap: 0.75rem;
+      }
+    }
+
+    // ── Hamburger button ──
+    &__hamburger {
+      display: none; // hidden on desktop
+
+      @media (max-width: $bp-lg) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        width: 2.25rem;
+        height: 2.25rem;
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 2px;
+        cursor: pointer;
+        padding: 0;
+        flex-shrink: 0;
+        transition: border-color 0.2s ease;
+
+        &:hover {
+          border-color: rgba(255, 255, 255, 0.38);
+        }
+      }
+    }
+
+    &__ham-bar {
+      display: block;
+      width: 16px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 1px;
+      transition: transform 0.25s ease, opacity 0.2s ease;
+
+      // Animate into X when open
+      .header__hamburger.is-open &:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+      }
+      .header__hamburger.is-open &:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+      }
+      .header__hamburger.is-open &:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+      }
+    }
+
+    // ── Mobile dropdown menu ──
+    &__mobile-menu {
+      // Hidden by default — controlled via max-height + opacity transition
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: max-height 0.28s ease, opacity 0.22s ease;
+
+      // Always solid background — the header may be transparent while
+      // the menu is open, so the menu brings its own backdrop
+      background: rgba(10, 10, 20, 0.97);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+      // Completely absent on desktop — hamburger can't be clicked there
+      // but this is a belt-and-suspenders guard
+      @media (min-width: #{$bp-lg + 1}) {
+        display: none;
+      }
+
+      &.is-open {
+        max-height: 400px; // generous upper bound — only actual content height is used
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        padding-top: 0.5rem;
+        padding-bottom: 1rem;
+      }
+    }
+
+    &__mobile-link {
+      display: block;
+      padding: 0.85rem 0;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.62);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: color 0.18s ease;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        color: #fff;
+      }
+
+      // Schedule a Tour — accent treatment
+      &--accent {
+        color: $color-accent;
+        margin-top: 0.4rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: none;
+        padding-top: 1rem;
+
+        &:hover {
+          color: #fff;
+        }
       }
     }
   }
