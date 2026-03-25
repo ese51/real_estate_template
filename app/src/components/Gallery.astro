@@ -144,6 +144,15 @@ const totalRemaining = overflow.length;
       &:hover img {
         transform: scale(1.03);
       }
+
+      // Mobile: tie height to viewport width so the container stays
+      // landscape-ish. At 390px width: ~290px tall (4:3 ratio) vs the
+      // current 480px min, so ~75% of image width is visible instead
+      // of ~40%. Override min-height so it doesn't fight the rule.
+      @media (max-width: $bp-sm) {
+        height: 75vw;
+        min-height: 180px;
+      }
     }
 
     &__featured-overlay {
@@ -204,6 +213,15 @@ const totalRemaining = overflow.length;
       &:hover img {
         transform: scale(1.06);
         opacity: 0.85;
+      }
+
+      // On mobile, anchor images toward the upper portion so rooflines
+      // and ceiling details aren't cut when a portrait-ish image appears
+      // in the landscape 4:3 grid cell.
+      @media (max-width: $bp-sm) {
+        img {
+          object-position: center 20%;
+        }
       }
     }
 
