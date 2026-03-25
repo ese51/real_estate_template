@@ -35,6 +35,13 @@ const slides = carouselImages.length > 0
     : [];
 
 const hasSlides = slides.length > 0;
+const topStats = [
+  { label: 'List Price', value: price_display },
+  { label: 'Bedrooms', value: stats.beds },
+  { label: 'Bathrooms', value: stats.baths },
+  { label: 'Sq Ft', value: stats.sqft.toLocaleString() },
+  { label: 'Year Built', value: stats.year_built },
+].filter((item) => item.value !== undefined && item.value !== null && item.value !== '');
 ---
 
 <section class="hero" id="hero" aria-label="Property hero">
@@ -61,30 +68,17 @@ const hasSlides = slides.length > 0;
   <div class="hero__stats-strip">
     <div class="container">
       <div class="hero__stats">
-        <div class="hero__stat">
-          <span class="hero__stat-num">{price_display}</span>
-          <span class="hero__stat-label">List Price</span>
-        </div>
-        <div class="hero__stat-sep" aria-hidden="true"></div>
-        <div class="hero__stat">
-          <span class="hero__stat-num">{stats.beds}</span>
-          <span class="hero__stat-label">Bedrooms</span>
-        </div>
-        <div class="hero__stat-sep" aria-hidden="true"></div>
-        <div class="hero__stat">
-          <span class="hero__stat-num">{stats.baths}</span>
-          <span class="hero__stat-label">Bathrooms</span>
-        </div>
-        <div class="hero__stat-sep" aria-hidden="true"></div>
-        <div class="hero__stat">
-          <span class="hero__stat-num">{stats.sqft.toLocaleString()}</span>
-          <span class="hero__stat-label">Sq Ft</span>
-        </div>
-        <div class="hero__stat-sep" aria-hidden="true"></div>
-        <div class="hero__stat">
-          <span class="hero__stat-num">{stats.year_built}</span>
-          <span class="hero__stat-label">Year Built</span>
-        </div>
+        {topStats.map((item, index) => (
+          <>
+            <div class="hero__stat">
+              <span class="hero__stat-num">{item.value}</span>
+              <span class="hero__stat-label">{item.label}</span>
+            </div>
+            {index < topStats.length - 1 && (
+              <div class="hero__stat-sep" aria-hidden="true"></div>
+            )}
+          </>
+        ))}
       </div>
     </div>
   </div>

@@ -7,6 +7,16 @@ interface Props {
 
 const { property } = Astro.props;
 const { description, address, stats, price_display } = property;
+
+const quickFacts = [
+  { label: 'Style', value: stats.style },
+  { label: 'Year Built', value: stats.year_built },
+  { label: 'Living Area', value: `${stats.sqft.toLocaleString()} sq ft` },
+  { label: 'Lot Size', value: stats.lot_size },
+  { label: 'Bedrooms', value: stats.beds },
+  { label: 'Bathrooms', value: stats.baths },
+  { label: 'Garage', value: stats.garage },
+].filter((fact) => fact.value !== undefined && fact.value !== null && fact.value !== '');
 ---
 
 <section class="about section" id="about" aria-label="About this property">
@@ -28,34 +38,12 @@ const { description, address, stats, price_display } = property;
           </div>
 
           <dl class="about__dl">
-            <div class="about__dl-row">
-              <dt>Style</dt>
-              <dd>{stats.style}</dd>
-            </div>
-            <div class="about__dl-row">
-              <dt>Year Built</dt>
-              <dd>{stats.year_built}</dd>
-            </div>
-            <div class="about__dl-row">
-              <dt>Living Area</dt>
-              <dd>{stats.sqft.toLocaleString()} sq ft</dd>
-            </div>
-            <div class="about__dl-row">
-              <dt>Lot Size</dt>
-              <dd>{stats.lot_size}</dd>
-            </div>
-            <div class="about__dl-row">
-              <dt>Bedrooms</dt>
-              <dd>{stats.beds}</dd>
-            </div>
-            <div class="about__dl-row">
-              <dt>Bathrooms</dt>
-              <dd>{stats.baths}</dd>
-            </div>
-            <div class="about__dl-row">
-              <dt>Garage</dt>
-              <dd>{stats.garage}</dd>
-            </div>
+            {quickFacts.map((fact) => (
+              <div class="about__dl-row">
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
           </dl>
 
           <a href="#contact" class="about__card-cta">

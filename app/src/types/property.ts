@@ -22,10 +22,10 @@ export interface PropertyStats {
   beds: number;
   baths: number;
   sqft: number;
-  lot_size: string;          // e.g. "0.35 acres" or "15,000 sq ft"
-  year_built: number;
-  garage: string;            // e.g. "2-car attached"
-  style: string;             // e.g. "Colonial", "Contemporary"
+  lot_size?: string;         // e.g. "0.35 acres" or "15,000 sq ft"
+  year_built?: number;
+  garage?: string;           // e.g. "2-car attached"
+  style?: string;            // e.g. "Colonial", "Contemporary"
 }
 
 export interface GalleryImage {

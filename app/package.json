@@ -6,7 +6,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "sync": "astro sync"
+    "sync": "astro sync",
+    "builder": "node builder/dist/cli.js",
+    "builder:compile": "tsc -p builder/tsconfig.json"
   },
   "dependencies": {
     "astro": "^4.16.0",
