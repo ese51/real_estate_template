@@ -232,6 +232,7 @@ function runAppBuild(appDir: string): void {
   const result = spawnSync(npmCommand, ['run', 'build'], {
     cwd: appDir,
     encoding: 'utf8',
+    shell: process.platform === 'win32',
     windowsHide: true,
   });
 
