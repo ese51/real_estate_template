@@ -60,6 +60,10 @@ function toAlphanumericTokens(raw: string): string[] {
   return normalized ? normalized.split(/\s+/) : [];
 }
 
+function canonicalizeSlugValue(raw: string): string {
+  return normalizeAscii(raw).replace(/[^a-z0-9]/g, '');
+}
+
 export function deriveBaseSlugFromAddress(address: string): string {
   const streetLine = address.split(',')[0] ?? address;
   const streetTokens = toAlphanumericTokens(streetLine);
@@ -83,7 +87,7 @@ export function deriveBaseSlugFromAddress(address: string): string {
     slugTokens.pop();
   }
 
-  const slug = `${houseNumber}${slugTokens.join('')}`.replace(/[^a-z0-9]/g, '');
+  const slug = canonicalizeSlugValue(`${houseNumber}${slugTokens.join('')}`);
 
   if (!slug) {
     throw new Error('Unable to derive a valid slug from payload');
@@ -114,7 +118,7 @@ function createDeterministicSlugSuffix(input: string): string {
 
 async function listExistingPropertyEntries(
   propertiesDir: string
-): Promise<Array<{ slug: string; addressIdentity: string }>> {
+): Promise<Array<{ slug: string; canonicalSlug: string; addressIdentity: string }>> {
   const fileEntries = await fs.readdir(propertiesDir, { withFileTypes: true });
   const jsonFileNames = fileEntries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
@@ -134,6 +138,7 @@ async function listExistingPropertyEntries(
 
       return {
         slug: parsed.meta.slug,
+        canonicalSlug: canonicalizeSlugValue(parsed.meta.slug),
         addressIdentity: [
           parsed.address.street,
           parsed.address.city,
@@ -144,7 +149,7 @@ async function listExistingPropertyEntries(
     })
   );
 
-  return entries.filter((entry): entry is { slug: string; addressIdentity: string } => entry !== null);
+  return entries.filter((entry): entry is { slug: string; canonicalSlug: string; addressIdentity: string } => entry !== null);
 }
 
 async function ensureSlug(
@@ -155,7 +160,7 @@ async function ensureSlug(
   const addressIdentity = createAddressIdentity(payload);
   const existingEntries = await listExistingPropertyEntries(propertiesDir);
   const conflictingEntries = existingEntries.filter(
-    (entry) => entry.slug === baseSlug && entry.addressIdentity !== addressIdentity
+    (entry) => entry.canonicalSlug === baseSlug && entry.addressIdentity !== addressIdentity
   );
 
   if (conflictingEntries.length === 0) {
@@ -166,7 +171,7 @@ async function ensureSlug(
   const takenSlugs = new Set(
     existingEntries
       .filter((entry) => entry.addressIdentity !== addressIdentity)
-      .map((entry) => entry.slug)
+      .map((entry) => entry.canonicalSlug)
   );
 
   for (let suffixLength = 4; suffixLength <= hash.length; suffixLength += 1) {

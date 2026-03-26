@@ -101,6 +101,28 @@ async function cleanupSlug(slug, artifactFolderPath) {
   ]);
 }
 
+async function writeLegacyPropertyJson(slug, overrides = {}) {
+  const sourcePath = path.join(appDir, 'src/data/properties/11940river.json');
+  const targetPath = path.join(appDir, 'src/data/properties', `${slug}.json`);
+  const property = JSON.parse(await fs.readFile(sourcePath, 'utf8'));
+  const nextProperty = {
+    ...property,
+    ...overrides,
+    meta: {
+      ...property.meta,
+      ...(overrides.meta ?? {}),
+      slug,
+    },
+    address: {
+      ...property.address,
+      ...(overrides.address ?? {}),
+    },
+  };
+
+  await fs.writeFile(targetPath, `${JSON.stringify(nextProperty, null, 2)}\n`, 'utf8');
+  return targetPath;
+}
+
 test('builder writes a new property JSON and build includes the slug route', async () => {
   const payload = makePayload({
     address: '4410 Builder Ridge Rd',
@@ -271,6 +293,52 @@ test('compact slug derivation matches canonical route format examples', () => {
   assert.equal(deriveBaseSlugFromAddress('9250 Persimmon Tree Rd, Potomac, MD'), '9250persimmontree');
   assert.equal(deriveBaseSlugFromAddress('11940 River Rd, Potomac, MD'), '11940river');
   assert.equal(deriveBaseSlugFromAddress('1615 N Wakefield St, Arlington, VA'), '1615nwakefield');
+});
+
+test('builder returns canonical no-dash slug and preserves legacy dashed route compatibility', async () => {
+  const payload = makePayload({
+    address: '9251 Persimmon Tree Rd',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+    slug: '9251-persimmon-tree-rd',
+  });
+  const canonicalSlug = '9251persimmontree';
+  const legacySlug = '9251-persimmon-tree-rd';
+  const artifactRoot = await makeArtifactRoot('builder-legacy-slug-test');
+  const artifactFolderPath = path.join(artifactRoot, 'site');
+  payload.artifact_folder_path = artifactFolderPath;
+
+  try {
+    await writeLegacyPropertyJson(legacySlug, {
+      address: {
+        street: payload.address,
+        city: payload.city,
+        state: payload.state,
+        zip: payload.postal_code,
+      },
+    });
+
+    const result = await build_site_from_listing(payload, null, false);
+
+    assert.equal(result.slug, canonicalSlug);
+    assert.equal(result.route_path, `/${canonicalSlug}`);
+    assert.notEqual(result.slug, legacySlug);
+    assert.notEqual(result.route_path, `/${legacySlug}`);
+
+    const writtenJson = JSON.parse(
+      await fs.readFile(path.join(appDir, 'src/data/properties', `${canonicalSlug}.json`), 'utf8')
+    );
+    assert.equal(writtenJson.meta.slug, canonicalSlug);
+
+    await fs.access(path.join(appDir, 'dist', canonicalSlug, 'index.html'));
+    await fs.access(path.join(appDir, 'dist', legacySlug, 'index.html'));
+    await fs.access(path.join(appDir, 'src/data/properties', `${legacySlug}.json`));
+  } finally {
+    await cleanupSlug(canonicalSlug, artifactFolderPath);
+    await cleanupSlug(legacySlug, null);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
+  }
 });
 
 test('builder adds deterministic fallback only when compact slug collides', async () => {
