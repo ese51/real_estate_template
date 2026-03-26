@@ -7,13 +7,12 @@ const { spawnSync } = require('node:child_process');
 
 const appDir = path.resolve(__dirname, '../..');
 const repoRoot = path.resolve(appDir, '..');
-const { build_site_from_listing } = require(path.join(appDir, 'builder/dist/index.js'));
+const {
+  build_site_from_listing,
+  deriveBaseSlugFromAddress,
+} = require(path.join(appDir, 'builder/dist/index.js'));
 
-function makeSlug(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function makePayload(slug, artifactFolderPath) {
+function makePayload(overrides = {}, artifactFolderPath = null) {
   return {
     address: '501 Builder Test Lane',
     city: 'Arlington',
@@ -36,8 +35,40 @@ function makePayload(slug, artifactFolderPath) {
     ],
     source_url: 'https://example.com/test-listing',
     artifact_folder_path: artifactFolderPath,
-    slug,
+    slug: null,
+    ...overrides,
   };
+}
+
+function makeArtifactRoot(label) {
+  return fs.mkdtemp(path.join(os.tmpdir(), `${label}-artifact-`));
+}
+
+function makeAddressIdentity(payload) {
+  return [
+    payload.address,
+    payload.city,
+    payload.state,
+    payload.postal_code,
+  ]
+    .join(' ')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
+function expectedCollisionSlug(payload) {
+  const baseSlug = deriveBaseSlugFromAddress(payload.address);
+  const addressIdentity = makeAddressIdentity(payload);
+  let hash = 2166136261;
+
+  for (const char of addressIdentity) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return `${baseSlug}${(hash >>> 0).toString(36).slice(0, 4)}`;
 }
 
 async function listRelativeFiles(dirPath) {
@@ -71,10 +102,16 @@ async function cleanupSlug(slug, artifactFolderPath) {
 }
 
 test('builder writes a new property JSON and build includes the slug route', async () => {
-  const slug = makeSlug('builder-test');
-  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const payload = makePayload({
+    address: '4410 Builder Ridge Rd',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+  });
+  const slug = '4410builderridge';
+  const artifactRoot = await makeArtifactRoot(slug);
   const artifactFolderPath = path.join(artifactRoot, 'site');
-  const payload = makePayload(slug, artifactFolderPath);
+  payload.artifact_folder_path = artifactFolderPath;
 
   try {
     const result = await build_site_from_listing(payload, null, false);
@@ -102,9 +139,15 @@ test('builder rejects Windows artifact paths on non-Windows hosts before creatin
     return;
   }
 
-  const slug = makeSlug('builder-invalid-windows-artifact');
+  const payload = makePayload({
+    address: '4410 Builder Regression Ln',
+    city: 'Arlington',
+    state: 'VA',
+    postal_code: '22207',
+  });
+  const slug = deriveBaseSlugFromAddress(payload.address);
   const windowsArtifactPath = 'D:\\hivebrain\\real_estate_monitoring\\artifacts\\9250-persimmon-tree-rd-potomac-md';
-  const payload = makePayload(slug, windowsArtifactPath);
+  payload.artifact_folder_path = windowsArtifactPath;
   const accidentalRepoPath = path.join(repoRoot, windowsArtifactPath);
 
   try {
@@ -124,18 +167,28 @@ test('builder rejects Windows artifact paths on non-Windows hosts before creatin
 });
 
 test('builder force_rebuild replaces prior slug outputs on repeated builds', async () => {
-  const slug = makeSlug('builder-rebuild-test');
-  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const firstPayload = makePayload({
+    address: '1617 N Wakefield St',
+    city: 'Arlington',
+    state: 'VA',
+    postal_code: '22207',
+  });
+  const slug = '1617nwakefield';
+  const artifactRoot = await makeArtifactRoot(slug);
   const artifactFolderPath = path.join(artifactRoot, 'site');
-  const firstPayload = makePayload(slug, artifactFolderPath);
   const secondPayload = {
-    ...makePayload(slug, artifactFolderPath),
-    address: '777 Rebuild Success Ave',
+    ...makePayload({
+      address: '1617 N Wakefield St',
+      city: 'Arlington',
+      state: 'VA',
+      postal_code: '22207',
+    }, artifactFolderPath),
     description: 'Second build payload that should replace prior outputs.',
     image_urls: [
       path.join(appDir, 'public/images/11940river/entry-1.jpg'),
     ],
   };
+  firstPayload.artifact_folder_path = artifactFolderPath;
 
   try {
     await build_site_from_listing(firstPayload, null, false);
@@ -176,11 +229,17 @@ test('builder force_rebuild replaces prior slug outputs on repeated builds', asy
 });
 
 test('builder CLI returns success when the built route exists', async () => {
-  const slug = makeSlug('builder-cli-test');
-  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const payload = makePayload({
+    address: '11941 River Rd',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+  });
+  const slug = '11941river';
+  const artifactRoot = await makeArtifactRoot('builder-cli-test');
   const artifactFolderPath = path.join(artifactRoot, 'site');
-  const payload = makePayload(slug, artifactFolderPath);
-  const payloadPath = path.join(os.tmpdir(), `${slug}.json`);
+  payload.artifact_folder_path = artifactFolderPath;
+  const payloadPath = path.join(os.tmpdir(), `${slug}-${Date.now()}.json`);
 
   try {
     await fs.writeFile(payloadPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
@@ -205,5 +264,47 @@ test('builder CLI returns success when the built route exists', async () => {
     await cleanupSlug(slug, artifactFolderPath);
     await fs.rm(artifactRoot, { recursive: true, force: true });
     await fs.rm(payloadPath, { force: true });
+  }
+});
+
+test('compact slug derivation matches canonical route format examples', () => {
+  assert.equal(deriveBaseSlugFromAddress('9250 Persimmon Tree Rd, Potomac, MD'), '9250persimmontree');
+  assert.equal(deriveBaseSlugFromAddress('11940 River Rd, Potomac, MD'), '11940river');
+  assert.equal(deriveBaseSlugFromAddress('1615 N Wakefield St, Arlington, VA'), '1615nwakefield');
+});
+
+test('builder adds deterministic fallback only when compact slug collides', async () => {
+  const firstPayload = makePayload({
+    address: '500 Main Rd',
+    city: 'Arlington',
+    state: 'VA',
+    postal_code: '22207',
+  });
+  const secondPayload = makePayload({
+    address: '500 Main Ct',
+    city: 'Arlington',
+    state: 'VA',
+    postal_code: '22207',
+  });
+  const artifactRoot = await makeArtifactRoot('builder-collision-test');
+  const firstArtifactFolderPath = path.join(artifactRoot, 'site-a');
+  const secondArtifactFolderPath = path.join(artifactRoot, 'site-b');
+  firstPayload.artifact_folder_path = firstArtifactFolderPath;
+  secondPayload.artifact_folder_path = secondArtifactFolderPath;
+
+  try {
+    const firstResult = await build_site_from_listing(firstPayload, null, false);
+    const secondResult = await build_site_from_listing(secondPayload, null, false);
+
+    assert.equal(firstResult.slug, '500main');
+    assert.equal(secondResult.slug, expectedCollisionSlug(secondPayload));
+    assert.match(secondResult.slug, /^500main[0-9a-z]{4}$/);
+
+    const secondRebuild = await build_site_from_listing(secondPayload, null, true);
+    assert.equal(secondRebuild.slug, secondResult.slug);
+  } finally {
+    await cleanupSlug('500main', firstArtifactFolderPath);
+    await cleanupSlug(expectedCollisionSlug(secondPayload), secondArtifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
   }
 });

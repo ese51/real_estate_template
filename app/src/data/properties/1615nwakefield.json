@@ -6,10 +6,10 @@
   "_demo_note": "This is a demo marketing site built as a template. It is not the official brokerage site. Contact the listing agent at Compass for official inquiries.",
 
   "meta": {
-    "slug": "wakefield",
+    "slug": "1615nwakefield",
     "site_title": "1615 N Wakefield St — Arlington, VA 22207",
     "site_description": "Custom four-level modern Colonial in North Arlington — 6 bedrooms, 7.5 baths, 7,584 sq ft, rooftop deck. Built 2025. Listed at $2,845,000.",
-    "og_image": "/images/1615-n-wakefield-arlington/exterior-front.webp"
+    "og_image": "/images/1615nwakefield/exterior-front.webp"
   },
 
   "address": {
@@ -39,50 +39,50 @@
   },
 
   "gallery": {
-    "hero_image": "/images/1615-n-wakefield-arlington/exterior-front.webp",
+    "hero_image": "/images/1615nwakefield/exterior-front.webp",
     "images": [
-      { "url": "/images/1615-n-wakefield-arlington/exterior-front.webp",   "alt": "Front exterior", "caption": "Curb appeal" },
-      { "url": "/images/1615-n-wakefield-arlington/exterior-front-2.webp", "alt": "Front exterior — alternate angle" },
-      { "url": "/images/1615-n-wakefield-arlington/exterior-1.webp",       "alt": "Exterior" },
-      { "url": "/images/1615-n-wakefield-arlington/living-1.webp",         "alt": "Living room", "caption": "Main living area" },
-      { "url": "/images/1615-n-wakefield-arlington/living-2.webp",         "alt": "Living room — view 2" },
-      { "url": "/images/1615-n-wakefield-arlington/living-3.webp",         "alt": "Living room — view 3" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-1.webp",        "alt": "Kitchen", "caption": "Chef's kitchen" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-2.webp",        "alt": "Kitchen — view 2" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-3.webp",        "alt": "Kitchen — view 3" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-4.webp",        "alt": "Kitchen — view 4" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-5.webp",        "alt": "Kitchen — view 5" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-6.webp",        "alt": "Kitchen — view 6" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-7.webp",        "alt": "Kitchen — view 7" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-8.webp",        "alt": "Kitchen — view 8" },
-      { "url": "/images/1615-n-wakefield-arlington/kitchen-9.webp",        "alt": "Kitchen — view 9" },
-      { "url": "/images/1615-n-wakefield-arlington/dining-1.webp",         "alt": "Dining room", "caption": "Formal dining" },
-      { "url": "/images/1615-n-wakefield-arlington/dining-2.webp",         "alt": "Dining room — view 2" },
-      { "url": "/images/1615-n-wakefield-arlington/dining-3.webp",         "alt": "Dining room — view 3" },
-      { "url": "/images/1615-n-wakefield-arlington/bedroom-1.webp",        "alt": "Bedroom suite", "caption": "Ensuite bedroom" },
-      { "url": "/images/1615-n-wakefield-arlington/bedroom-2.webp",        "alt": "Bedroom — view 2" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-1.webp",       "alt": "Bath", "caption": "Spa bath" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-2.webp",       "alt": "Bath — view 2" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-3.webp",       "alt": "Bath — view 3" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-4.webp",       "alt": "Bath — view 4" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-5.webp",       "alt": "Bath — view 5" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-6.webp",       "alt": "Bath — view 6" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-7.webp",       "alt": "Bath — view 7" },
-      { "url": "/images/1615-n-wakefield-arlington/bathroom-8.webp",       "alt": "Bath — view 8" },
-      { "url": "/images/1615-n-wakefield-arlington/exterior-back.webp",    "alt": "Rear exterior", "caption": "Private rear grounds" },
-      { "url": "/images/1615-n-wakefield-arlington/exterior-back-2.webp",  "alt": "Rear exterior — view 2" },
-      { "url": "/images/1615-n-wakefield-arlington/exterior-porch.webp",   "alt": "Entry porch" },
-      { "url": "/images/1615-n-wakefield-arlington/exterior-yard.webp",    "alt": "Yard" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-1.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-2.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-3.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-4.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-5.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-6.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-7.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-8.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-9.webp",          "alt": "Interior detail" },
-      { "url": "/images/1615-n-wakefield-arlington/extra-10.webp",         "alt": "Interior detail" }
+      { "url": "/images/1615nwakefield/exterior-front.webp",   "alt": "Front exterior", "caption": "Curb appeal" },
+      { "url": "/images/1615nwakefield/exterior-front-2.webp", "alt": "Front exterior — alternate angle" },
+      { "url": "/images/1615nwakefield/exterior-1.webp",       "alt": "Exterior" },
+      { "url": "/images/1615nwakefield/living-1.webp",         "alt": "Living room", "caption": "Main living area" },
+      { "url": "/images/1615nwakefield/living-2.webp",         "alt": "Living room — view 2" },
+      { "url": "/images/1615nwakefield/living-3.webp",         "alt": "Living room — view 3" },
+      { "url": "/images/1615nwakefield/kitchen-1.webp",        "alt": "Kitchen", "caption": "Chef's kitchen" },
+      { "url": "/images/1615nwakefield/kitchen-2.webp",        "alt": "Kitchen — view 2" },
+      { "url": "/images/1615nwakefield/kitchen-3.webp",        "alt": "Kitchen — view 3" },
+      { "url": "/images/1615nwakefield/kitchen-4.webp",        "alt": "Kitchen — view 4" },
+      { "url": "/images/1615nwakefield/kitchen-5.webp",        "alt": "Kitchen — view 5" },
+      { "url": "/images/1615nwakefield/kitchen-6.webp",        "alt": "Kitchen — view 6" },
+      { "url": "/images/1615nwakefield/kitchen-7.webp",        "alt": "Kitchen — view 7" },
+      { "url": "/images/1615nwakefield/kitchen-8.webp",        "alt": "Kitchen — view 8" },
+      { "url": "/images/1615nwakefield/kitchen-9.webp",        "alt": "Kitchen — view 9" },
+      { "url": "/images/1615nwakefield/dining-1.webp",         "alt": "Dining room", "caption": "Formal dining" },
+      { "url": "/images/1615nwakefield/dining-2.webp",         "alt": "Dining room — view 2" },
+      { "url": "/images/1615nwakefield/dining-3.webp",         "alt": "Dining room — view 3" },
+      { "url": "/images/1615nwakefield/bedroom-1.webp",        "alt": "Bedroom suite", "caption": "Ensuite bedroom" },
+      { "url": "/images/1615nwakefield/bedroom-2.webp",        "alt": "Bedroom — view 2" },
+      { "url": "/images/1615nwakefield/bathroom-1.webp",       "alt": "Bath", "caption": "Spa bath" },
+      { "url": "/images/1615nwakefield/bathroom-2.webp",       "alt": "Bath — view 2" },
+      { "url": "/images/1615nwakefield/bathroom-3.webp",       "alt": "Bath — view 3" },
+      { "url": "/images/1615nwakefield/bathroom-4.webp",       "alt": "Bath — view 4" },
+      { "url": "/images/1615nwakefield/bathroom-5.webp",       "alt": "Bath — view 5" },
+      { "url": "/images/1615nwakefield/bathroom-6.webp",       "alt": "Bath — view 6" },
+      { "url": "/images/1615nwakefield/bathroom-7.webp",       "alt": "Bath — view 7" },
+      { "url": "/images/1615nwakefield/bathroom-8.webp",       "alt": "Bath — view 8" },
+      { "url": "/images/1615nwakefield/exterior-back.webp",    "alt": "Rear exterior", "caption": "Private rear grounds" },
+      { "url": "/images/1615nwakefield/exterior-back-2.webp",  "alt": "Rear exterior — view 2" },
+      { "url": "/images/1615nwakefield/exterior-porch.webp",   "alt": "Entry porch" },
+      { "url": "/images/1615nwakefield/exterior-yard.webp",    "alt": "Yard" },
+      { "url": "/images/1615nwakefield/extra-1.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-2.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-3.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-4.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-5.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-6.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-7.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-8.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-9.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-10.webp",         "alt": "Interior detail" }
     ]
   },
 
@@ -171,22 +171,22 @@
   "floor_plans": [
     {
       "name": "First Floor",
-      "image": "/images/1615-n-wakefield-arlington/floorplan1st.webp",
+      "image": "/images/1615nwakefield/floorplan1st.webp",
       "description": "Entry, kitchen, dining, living, and garage access."
     },
     {
       "name": "Second Floor",
-      "image": "/images/1615-n-wakefield-arlington/floorplan2nd.webp",
+      "image": "/images/1615nwakefield/floorplan2nd.webp",
       "description": "Five ensuite bedrooms, each with walk-in closet."
     },
     {
       "name": "Third Floor",
-      "image": "/images/1615-n-wakefield-arlington/floorplan3rd.webp",
+      "image": "/images/1615nwakefield/floorplan3rd.webp",
       "description": "Vaulted flex space with full bath, wet bar, and rooftop deck access."
     },
     {
       "name": "Lower Level",
-      "image": "/images/1615-n-wakefield-arlington/floorplanbasement.webp",
+      "image": "/images/1615nwakefield/floorplanbasement.webp",
       "description": "Daylit walk-out lower level with separate entrance — bedroom, full bath, and living area."
     }
   ],

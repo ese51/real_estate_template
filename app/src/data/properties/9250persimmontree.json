@@ -1,9 +1,9 @@
 {
   "meta": {
-    "slug": "9250-persimmon-tree-rd",
+    "slug": "9250persimmontree",
     "site_title": "9250 Persimmon Tree Rd — Potomac, MD 20854",
     "site_description": "9250 Persimmon Tree Rd — Potomac, MD 20854. 7 bedrooms, 8 baths, 9,850 sq ft. Listed at $4,500,000. Tucked behind automatic wrought-iron gates along a picturesque, verdant stretch of country lane, 9250 Persimmon Tree Road is a spectacular French country estate that blends old-world charm and grandeu",
-    "og_image": "/images/9250-persimmon-tree-rd/listing-01.jpg"
+    "og_image": "/images/9250persimmontree/listing-01.jpg"
   },
   "address": {
     "street": "9250 Persimmon Tree Rd",
@@ -23,59 +23,59 @@
     "sqft": 9850
   },
   "gallery": {
-    "hero_image": "/images/9250-persimmon-tree-rd/listing-01.jpg",
+    "hero_image": "/images/9250persimmontree/listing-01.jpg",
     "images": [
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-01.jpg",
+        "url": "/images/9250persimmontree/listing-01.jpg",
         "alt": "9250 Persimmon Tree Rd photo 1",
         "caption": "Primary listing image"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-02.jpg",
+        "url": "/images/9250persimmontree/listing-02.jpg",
         "alt": "9250 Persimmon Tree Rd photo 2"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-03.jpg",
+        "url": "/images/9250persimmontree/listing-03.jpg",
         "alt": "9250 Persimmon Tree Rd photo 3"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-04.jpg",
+        "url": "/images/9250persimmontree/listing-04.jpg",
         "alt": "9250 Persimmon Tree Rd photo 4"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-05.jpg",
+        "url": "/images/9250persimmontree/listing-05.jpg",
         "alt": "9250 Persimmon Tree Rd photo 5"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-06.jpg",
+        "url": "/images/9250persimmontree/listing-06.jpg",
         "alt": "9250 Persimmon Tree Rd photo 6"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-07.jpg",
+        "url": "/images/9250persimmontree/listing-07.jpg",
         "alt": "9250 Persimmon Tree Rd photo 7"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-08.jpg",
+        "url": "/images/9250persimmontree/listing-08.jpg",
         "alt": "9250 Persimmon Tree Rd photo 8"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-09.jpg",
+        "url": "/images/9250persimmontree/listing-09.jpg",
         "alt": "9250 Persimmon Tree Rd photo 9"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-10.jpg",
+        "url": "/images/9250persimmontree/listing-10.jpg",
         "alt": "9250 Persimmon Tree Rd photo 10"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-11.jpg",
+        "url": "/images/9250persimmontree/listing-11.jpg",
         "alt": "9250 Persimmon Tree Rd photo 11"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-12.jpg",
+        "url": "/images/9250persimmontree/listing-12.jpg",
         "alt": "9250 Persimmon Tree Rd photo 12"
       },
       {
-        "url": "/images/9250-persimmon-tree-rd/listing-13.jpg",
+        "url": "/images/9250persimmontree/listing-13.jpg",
         "alt": "9250 Persimmon Tree Rd photo 13"
       }
     ]

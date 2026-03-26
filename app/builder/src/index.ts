@@ -11,19 +11,79 @@ import type {
 
 type Nullable<T> = T | null | undefined;
 const WINDOWS_DRIVE_PATH_PATTERN = /^[a-zA-Z]:[\\/]/;
+const STREET_SUFFIX_TOKENS = new Set([
+  'aly',
+  'allee',
+  'ave',
+  'avenue',
+  'blvd',
+  'boulevard',
+  'cir',
+  'circle',
+  'court',
+  'ct',
+  'dr',
+  'drive',
+  'hwy',
+  'highway',
+  'lane',
+  'ln',
+  'pkwy',
+  'parkway',
+  'pl',
+  'place',
+  'rd',
+  'road',
+  'st',
+  'street',
+  'ter',
+  'terrace',
+  'trl',
+  'trail',
+  'way',
+]);
+const UNIT_TOKENS = new Set(['apt', 'apartment', 'bldg', 'building', 'floor', 'fl', 'lot', 'ph', 'ste', 'suite', 'unit']);
 
 function isNonEmptyString(value: Nullable<string>): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function sanitizeSlug(raw: string): string {
-  const slug = raw
+function normalizeAscii(raw: string): string {
+  return raw
     .toLowerCase()
     .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function toAlphanumericTokens(raw: string): string[] {
+  const normalized = normalizeAscii(raw).replace(/[^a-z0-9]+/g, ' ').trim();
+  return normalized ? normalized.split(/\s+/) : [];
+}
+
+export function deriveBaseSlugFromAddress(address: string): string {
+  const streetLine = address.split(',')[0] ?? address;
+  const streetTokens = toAlphanumericTokens(streetLine);
+
+  if (streetTokens.length === 0) {
+    throw new Error('Unable to derive a valid slug from payload address');
+  }
+
+  const [houseNumber, ...remainingTokens] = streetTokens;
+  if (!/^\d+[a-z0-9]*$/.test(houseNumber)) {
+    throw new Error(`Unable to derive a valid slug from payload address: ${address}`);
+  }
+
+  let slugTokens = [...remainingTokens];
+  const unitIndex = slugTokens.findIndex((token) => UNIT_TOKENS.has(token));
+  if (unitIndex >= 0) {
+    slugTokens = slugTokens.slice(0, unitIndex);
+  }
+
+  while (slugTokens.length > 1 && STREET_SUFFIX_TOKENS.has(slugTokens[slugTokens.length - 1])) {
+    slugTokens.pop();
+  }
+
+  const slug = `${houseNumber}${slugTokens.join('')}`.replace(/[^a-z0-9]/g, '');
 
   if (!slug) {
     throw new Error('Unable to derive a valid slug from payload');
@@ -32,14 +92,91 @@ function sanitizeSlug(raw: string): string {
   return slug;
 }
 
-function ensureSlug(payload: HiveMindListingPayload): string {
-  if (isNonEmptyString(payload.slug)) {
-    return sanitizeSlug(payload.slug);
+function createAddressIdentity(payload: HiveMindListingPayload): string {
+  return [
+    payload.address,
+    payload.city,
+    payload.state,
+    payload.postal_code,
+  ].flatMap((part) => toAlphanumericTokens(String(part))).join('');
+}
+
+function createDeterministicSlugSuffix(input: string): string {
+  let hash = 2166136261;
+
+  for (const char of input) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
   }
 
-  return sanitizeSlug(
-    `${payload.address}-${payload.city}-${payload.state}-${payload.postal_code}`
+  return (hash >>> 0).toString(36);
+}
+
+async function listExistingPropertyEntries(
+  propertiesDir: string
+): Promise<Array<{ slug: string; addressIdentity: string }>> {
+  const fileEntries = await fs.readdir(propertiesDir, { withFileTypes: true });
+  const jsonFileNames = fileEntries
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.json'))
+    .map((entry) => entry.name);
+  const entries = await Promise.all(
+    jsonFileNames.map(async (fileName) => {
+      const filePath = path.join(propertiesDir, fileName);
+      const raw = await fs.readFile(filePath, 'utf8');
+      const parsed = JSON.parse(raw) as {
+        meta?: { slug?: string };
+        address?: { street?: string; city?: string; state?: string; zip?: string };
+      };
+
+      if (!isNonEmptyString(parsed.meta?.slug) || !parsed.address) {
+        return null;
+      }
+
+      return {
+        slug: parsed.meta.slug,
+        addressIdentity: [
+          parsed.address.street,
+          parsed.address.city,
+          parsed.address.state,
+          parsed.address.zip,
+        ].flatMap((part) => toAlphanumericTokens(String(part ?? ''))).join(''),
+      };
+    })
   );
+
+  return entries.filter((entry): entry is { slug: string; addressIdentity: string } => entry !== null);
+}
+
+async function ensureSlug(
+  payload: HiveMindListingPayload,
+  propertiesDir: string
+): Promise<string> {
+  const baseSlug = deriveBaseSlugFromAddress(payload.address);
+  const addressIdentity = createAddressIdentity(payload);
+  const existingEntries = await listExistingPropertyEntries(propertiesDir);
+  const conflictingEntries = existingEntries.filter(
+    (entry) => entry.slug === baseSlug && entry.addressIdentity !== addressIdentity
+  );
+
+  if (conflictingEntries.length === 0) {
+    return baseSlug;
+  }
+
+  const hash = createDeterministicSlugSuffix(addressIdentity);
+  const takenSlugs = new Set(
+    existingEntries
+      .filter((entry) => entry.addressIdentity !== addressIdentity)
+      .map((entry) => entry.slug)
+  );
+
+  for (let suffixLength = 4; suffixLength <= hash.length; suffixLength += 1) {
+    const candidate = `${baseSlug}${hash.slice(0, suffixLength)}`;
+    if (!takenSlugs.has(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error(`Unable to derive a unique slug for payload address: ${payload.address}`);
 }
 
 function detectExtension(source: string, fallback = '.jpg'): string {
@@ -279,7 +416,7 @@ export async function build_site_from_listing(
     : null;
 
   const paths = getTemplatePaths();
-  const slug = ensureSlug(payload);
+  const slug = await ensureSlug(payload, paths.properties_dir);
   const propertyJsonPath = path.join(paths.properties_dir, `${slug}.json`);
   const listingImagesDir = path.join(paths.listing_images_dir, slug);
   const listingImages = buildListingImages(slug, payload.image_urls, paths.listing_images_dir);
