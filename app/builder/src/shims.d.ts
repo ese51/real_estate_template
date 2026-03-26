@@ -2,6 +2,7 @@ declare const __dirname: string;
 declare const process: {
   platform: string;
   argv: string[];
+  env: Record<string, string | undefined>;
   stdout: { write: (value: string) => void };
   stderr: { write: (value: string) => void };
   exitCode?: number;
@@ -25,7 +26,7 @@ declare module 'node:fs' {
       isDirectory: () => boolean;
       isFile: () => boolean;
     }>>;
-    stat: (...args: unknown[]) => Promise<{ isFile: () => boolean }>;
+    stat: (...args: unknown[]) => Promise<{ isFile: () => boolean; size: number }>;
     copyFile: (...args: unknown[]) => Promise<void>;
     writeFile: (...args: unknown[]) => Promise<void>;
     readFile: (...args: unknown[]) => Promise<string>;

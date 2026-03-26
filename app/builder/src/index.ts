@@ -11,6 +11,7 @@ import type {
 
 type Nullable<T> = T | null | undefined;
 const WINDOWS_DRIVE_PATH_PATTERN = /^[a-zA-Z]:[\\/]/;
+const WINDOWS_ASTRO_BUILD_HEAP_MB = 4096;
 const STREET_SUFFIX_TOKENS = new Set([
   'aly',
   'allee',
@@ -380,11 +381,82 @@ async function stageArtifact(
   return written;
 }
 
-function runAppBuild(appDir: string): void {
+type BuildDiagnosticInput = {
+  slug: string;
+  propertyJsonPath: string;
+  listingImages: ResolvedImage[];
+};
+
+function applyBuildNodeOptions(existingNodeOptions: string | undefined): string | undefined {
+  const trimmed = existingNodeOptions?.trim();
+
+  if (process.platform !== 'win32') {
+    return trimmed || undefined;
+  }
+
+  if (trimmed?.includes('--max-old-space-size=')) {
+    return trimmed;
+  }
+
+  return trimmed
+    ? `${trimmed} --max-old-space-size=${WINDOWS_ASTRO_BUILD_HEAP_MB}`
+    : `--max-old-space-size=${WINDOWS_ASTRO_BUILD_HEAP_MB}`;
+}
+
+async function summarizeResolvedImages(images: ResolvedImage[]): Promise<{
+  count: number;
+  totalBytes: number;
+  largestImages: Array<{ path: string; bytes: number }>;
+}> {
+  const fileSizes = await Promise.all(
+    images.map(async (image) => {
+      const stats = await fs.stat(image.diskPath);
+      return {
+        path: image.diskPath,
+        bytes: stats.size,
+      };
+    })
+  );
+
+  const largestImages = [...fileSizes]
+    .sort((left, right) => right.bytes - left.bytes)
+    .slice(0, 3);
+
+  return {
+    count: fileSizes.length,
+    totalBytes: fileSizes.reduce((sum, entry) => sum + entry.bytes, 0),
+    largestImages,
+  };
+}
+
+async function runAppBuild(appDir: string, input: BuildDiagnosticInput): Promise<void> {
   const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const commandArgs = ['run', 'build'];
+  const nodeOptions = applyBuildNodeOptions(process.env.NODE_OPTIONS);
+  const propertyJsonStats = await fs.stat(input.propertyJsonPath);
+  const imageSummary = await summarizeResolvedImages(input.listingImages);
+
+  process.stderr.write(
+    `[builder] Astro build diagnostics: ${JSON.stringify({
+      cwd: appDir,
+      command: [npmCommand, ...commandArgs].join(' '),
+      node_options: nodeOptions ?? null,
+      slug: input.slug,
+      property_json_path: input.propertyJsonPath,
+      property_json_bytes: propertyJsonStats.size,
+      listing_image_count: imageSummary.count,
+      listing_image_total_bytes: imageSummary.totalBytes,
+      largest_listing_images: imageSummary.largestImages,
+    })}\n`
+  );
+
   const result = spawnSync(npmCommand, ['run', 'build'], {
     cwd: appDir,
     encoding: 'utf8',
+    env: {
+      ...process.env,
+      ...(nodeOptions ? { NODE_OPTIONS: nodeOptions } : {}),
+    },
     shell: process.platform === 'win32',
     windowsHide: true,
   });
@@ -467,7 +539,11 @@ export async function build_site_from_listing(
   await fs.writeFile(propertyJsonPath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
   writtenFiles.push(propertyJsonPath);
 
-  runAppBuild(paths.app_dir);
+  await runAppBuild(paths.app_dir, {
+    slug,
+    propertyJsonPath,
+    listingImages,
+  });
 
   const builtRoutePath = path.join(
     paths.dist_dir,
