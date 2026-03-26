@@ -12,6 +12,19 @@ const {
   deriveBaseSlugFromAddress,
 } = require(path.join(appDir, 'builder/dist/index.js'));
 
+function createMockFetchResponse(status, bodyBytes, headers = {}) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: {
+      entries: function* entries() {
+        yield* Object.entries(headers);
+      },
+    },
+    arrayBuffer: async () => Uint8Array.from(bodyBytes).buffer,
+  };
+}
+
 function makePayload(overrides = {}, artifactFolderPath = null) {
   return {
     address: '501 Builder Test Lane',
@@ -374,5 +387,108 @@ test('builder adds deterministic fallback only when compact slug collides', asyn
     await cleanupSlug('500main', firstArtifactFolderPath);
     await cleanupSlug(expectedCollisionSlug(secondPayload), secondArtifactFolderPath);
     await fs.rm(artifactRoot, { recursive: true, force: true });
+  }
+});
+
+test('builder continues when one listing image download returns 403 but another succeeds', async () => {
+  const originalFetch = global.fetch;
+  const fetchCalls = [];
+  const blockedUrl = 'https://content.mediastg.net/dyna_images/mls/105605/5459843.jpgx?h=540&d=0';
+  const workingUrl = 'https://images.example.com/listing/hero.jpg?size=large';
+  const payload = makePayload({
+    address: '9252 Persimmon Tree Rd',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+    image_urls: [blockedUrl, workingUrl],
+    source_url: 'https://example.com/listings/9252-persimmon-tree-rd',
+  });
+  const slug = '9252persimmontree';
+  const artifactRoot = await makeArtifactRoot('builder-partial-image-failure');
+  const artifactFolderPath = path.join(artifactRoot, 'site');
+  payload.artifact_folder_path = artifactFolderPath;
+
+  global.fetch = async (url, init = {}) => {
+    fetchCalls.push({ url, init });
+
+    if (url === blockedUrl) {
+      return createMockFetchResponse(403, [], {
+        'content-type': 'text/html',
+        server: 'mock-mediastg',
+      });
+    }
+
+    if (url === workingUrl) {
+      return createMockFetchResponse(200, [255, 216, 255, 217], {
+        'content-type': 'image/jpeg',
+      });
+    }
+
+    throw new Error(`Unexpected fetch URL: ${url}`);
+  };
+
+  try {
+    const result = await build_site_from_listing(payload, null, false);
+    const propertyPath = path.join(appDir, 'src/data/properties', `${slug}.json`);
+    const listingImagesDir = path.join(appDir, 'public/images', slug);
+    const writtenJson = JSON.parse(await fs.readFile(propertyPath, 'utf8'));
+    const listingFiles = await listRelativeFiles(listingImagesDir);
+
+    assert.equal(result.slug, slug);
+    assert.equal(fetchCalls.length, 2);
+    assert.equal(fetchCalls[0].url, blockedUrl);
+    assert.equal(fetchCalls[0].init.redirect, 'follow');
+    assert.equal(fetchCalls[0].init.headers.Referer, payload.source_url);
+    assert.match(fetchCalls[0].init.headers['User-Agent'], /Mozilla\/5\.0/);
+    assert.deepEqual(listingFiles, ['listing-02.jpg']);
+    assert.equal(writtenJson.meta.og_image, '/images/9252persimmontree/listing-02.jpg');
+    assert.equal(writtenJson.gallery.images.length, 1);
+    assert.equal(writtenJson.gallery.images[0].url, '/images/9252persimmontree/listing-02.jpg');
+  } finally {
+    global.fetch = originalFetch;
+    await cleanupSlug(slug, artifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
+  }
+});
+
+test('builder fails when no listing images can be downloaded', async () => {
+  const originalFetch = global.fetch;
+  const blockedUrls = [
+    'https://content.mediastg.net/dyna_images/mls/105605/5459843.jpgx?h=540&d=0',
+    'https://content.mediastg.net/dyna_images/mls/105605/5459844.jpgx?h=540&d=0',
+  ];
+  const payload = makePayload({
+    address: '9253 Persimmon Tree Rd',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+    image_urls: blockedUrls,
+    source_url: 'https://example.com/listings/9253-persimmon-tree-rd',
+  });
+  const slug = '9253persimmontree';
+
+  global.fetch = async (url) => {
+    if (blockedUrls.includes(url)) {
+      return createMockFetchResponse(403, [], {
+        'content-type': 'text/html',
+        server: 'mock-mediastg',
+      });
+    }
+
+    throw new Error(`Unexpected fetch URL: ${url}`);
+  };
+
+  try {
+    await assert.rejects(
+      build_site_from_listing(payload, null, false),
+      /downloaded 0 of 2 listing image\(s\); template "real-estate-template" requires at least 1/
+    );
+
+    await assert.rejects(
+      fs.access(path.join(appDir, 'src/data/properties', `${slug}.json`))
+    );
+  } finally {
+    global.fetch = originalFetch;
+    await cleanupSlug(slug, null);
   }
 });

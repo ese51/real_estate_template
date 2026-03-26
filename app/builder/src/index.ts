@@ -12,6 +12,22 @@ import type {
 type Nullable<T> = T | null | undefined;
 const WINDOWS_DRIVE_PATH_PATTERN = /^[a-zA-Z]:[\\/]/;
 const WINDOWS_ASTRO_BUILD_HEAP_MB = 4096;
+const REMOTE_DOWNLOAD_TIMEOUT_MS = 15000;
+const REMOTE_DOWNLOAD_MAX_ATTEMPTS = 2;
+const RETRYABLE_DOWNLOAD_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const BROWSER_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36';
+const CANONICAL_IMAGE_EXTENSIONS = new Set([
+  '.avif',
+  '.bmp',
+  '.gif',
+  '.heic',
+  '.heif',
+  '.jpeg',
+  '.jpg',
+  '.png',
+  '.svg',
+  '.webp',
+]);
 const STREET_SUFFIX_TOKENS = new Set([
   'aly',
   'allee',
@@ -95,6 +111,36 @@ export function deriveBaseSlugFromAddress(address: string): string {
   }
 
   return slug;
+}
+
+type RemoteDownloadContext = {
+  referer?: string;
+};
+
+type FailedImageDownload = {
+  source: string;
+  destinationPath: string;
+  error: string;
+  statusCode?: number;
+  responseHeaders?: Record<string, string>;
+};
+
+class RemoteDownloadError extends Error {
+  statusCode?: number;
+  responseHeaders?: Record<string, string>;
+
+  constructor(
+    message: string,
+    options?: {
+      statusCode?: number;
+      responseHeaders?: Record<string, string>;
+    }
+  ) {
+    super(message);
+    this.name = 'RemoteDownloadError';
+    this.statusCode = options?.statusCode;
+    this.responseHeaders = options?.responseHeaders;
+  }
 }
 
 function createAddressIdentity(payload: HiveMindListingPayload): string {
@@ -188,10 +234,113 @@ async function ensureSlug(
 function detectExtension(source: string, fallback = '.jpg'): string {
   const cleanSource = source.split('?')[0]?.split('#')[0] ?? source;
   const ext = path.extname(cleanSource).toLowerCase();
-  if (ext && ext.length <= 5) {
+  if (CANONICAL_IMAGE_EXTENSIONS.has(ext)) {
     return ext;
   }
+  const transformedExtMatch = ext.match(/^(\.[a-z0-9]{2,4})x$/);
+  if (transformedExtMatch && CANONICAL_IMAGE_EXTENSIONS.has(transformedExtMatch[1] ?? '')) {
+    return transformedExtMatch[1] ?? fallback;
+  }
   return fallback;
+}
+
+function getResponseHeadersObject(
+  headers: { entries?: () => IterableIterator<[string, string]> } | undefined
+): Record<string, string> | undefined {
+  if (!headers?.entries) {
+    return undefined;
+  }
+
+  const entries = Array.from(headers.entries());
+  if (entries.length === 0) {
+    return undefined;
+  }
+
+  return Object.fromEntries(entries);
+}
+
+function buildRemoteRequestHeaders(source: string, context: RemoteDownloadContext): Record<string, string> {
+  const referer = isNonEmptyString(context.referer)
+    ? context.referer.trim()
+    : new URL(source).origin;
+
+  return {
+    Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Cache-Control': 'no-cache',
+    Pragma: 'no-cache',
+    Referer: referer,
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': BROWSER_USER_AGENT,
+  };
+}
+
+async function fetchRemoteBuffer(
+  source: string,
+  context: RemoteDownloadContext
+): Promise<unknown> {
+  const headers = buildRemoteRequestHeaders(source, context);
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= REMOTE_DOWNLOAD_MAX_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REMOTE_DOWNLOAD_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(source, {
+        headers,
+        redirect: 'follow',
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const responseHeaders = getResponseHeadersObject(response.headers);
+        const error = new RemoteDownloadError(
+          `Failed to download image: ${source} (${response.status})`,
+          {
+            statusCode: response.status,
+            responseHeaders,
+          }
+        );
+
+        if (attempt < REMOTE_DOWNLOAD_MAX_ATTEMPTS && RETRYABLE_DOWNLOAD_STATUS_CODES.has(response.status)) {
+          lastError = error;
+          continue;
+        }
+
+        throw error;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    } catch (error) {
+      lastError = error;
+      const isAbortError = typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError';
+      if (attempt < REMOTE_DOWNLOAD_MAX_ATTEMPTS && isAbortError) {
+        continue;
+      }
+
+      if (isAbortError) {
+        throw new RemoteDownloadError(
+          `Failed to download image: ${source} (timeout after ${REMOTE_DOWNLOAD_TIMEOUT_MS}ms)`
+        );
+      }
+
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error(`Failed to download image: ${source}`);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+
+  throw new Error(`Failed to download image: ${source}`);
 }
 
 function resolveArtifactFolderPath(artifactFolderPath: string): string {
@@ -273,15 +422,14 @@ function isFileUrl(value: string): boolean {
   return /^file:\/\//i.test(value);
 }
 
-async function copyOrDownloadFile(source: string, destination: string): Promise<void> {
+async function copyOrDownloadFile(
+  source: string,
+  destination: string,
+  context: RemoteDownloadContext = {}
+): Promise<void> {
   if (isRemoteUrl(source)) {
-    const response = await fetch(source);
-    if (!response.ok) {
-      throw new Error(`Failed to download image: ${source} (${response.status})`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    await fs.writeFile(destination, Buffer.from(arrayBuffer));
+    const buffer = await fetchRemoteBuffer(source, context);
+    await fs.writeFile(destination, buffer);
     return;
   }
 
@@ -497,16 +645,40 @@ export async function build_site_from_listing(
   const propertyJsonPath = path.join(paths.properties_dir, `${slug}.json`);
   const listingImagesDir = path.join(paths.listing_images_dir, slug);
   const listingImages = buildListingImages(slug, payload.image_urls, paths.listing_images_dir);
+  const remoteDownloadContext: RemoteDownloadContext = {
+    referer: isNonEmptyString(payload.source_url) ? payload.source_url : undefined,
+  };
 
   await preparePropertyJsonPath(propertyJsonPath, force_rebuild);
   await prepareListingImagesDirectory(listingImagesDir, force_rebuild);
   await fs.mkdir(paths.agent_images_dir, { recursive: true });
 
   const writtenFiles: string[] = [];
+  const successfulListingImages: ResolvedImage[] = [];
+  const failedListingImages: FailedImageDownload[] = [];
 
   for (const image of listingImages) {
-    await copyOrDownloadFile(image.source, image.diskPath);
-    writtenFiles.push(image.diskPath);
+    try {
+      await copyOrDownloadFile(image.source, image.diskPath, remoteDownloadContext);
+      writtenFiles.push(image.diskPath);
+      successfulListingImages.push(image);
+    } catch (error) {
+      const failure: FailedImageDownload = {
+        source: image.source,
+        destinationPath: image.diskPath,
+        error: error instanceof Error ? error.message : String(error),
+        statusCode: error instanceof RemoteDownloadError ? error.statusCode : undefined,
+        responseHeaders: error instanceof RemoteDownloadError ? error.responseHeaders : undefined,
+      };
+      failedListingImages.push(failure);
+      process.stderr.write(`[builder] Listing image download failed: ${JSON.stringify(failure)}\n`);
+    }
+  }
+
+  if (successfulListingImages.length < selectedTemplate.payload_requirements.image_expectations.min_listing_images) {
+    throw new Error(
+      `Listing image download failure: downloaded ${successfulListingImages.length} of ${listingImages.length} listing image(s); template "${selectedTemplate.id}" requires at least ${selectedTemplate.payload_requirements.image_expectations.min_listing_images}. Failures: ${failedListingImages.map((failure) => `${failure.source}${failure.statusCode ? ` (${failure.statusCode})` : ''}`).join(', ')}`
+    );
   }
 
   let agentImagePublicPath: string | undefined;
@@ -521,7 +693,7 @@ export async function build_site_from_listing(
     const ext = detectExtension(agentImageSource, '.jpg');
     const destinationFileName = `${slug}-agent${ext}`;
     const destinationPath = path.join(paths.agent_images_dir, destinationFileName);
-    await copyOrDownloadFile(agentImageSource, destinationPath);
+    await copyOrDownloadFile(agentImageSource, destinationPath, remoteDownloadContext);
     writtenFiles.push(destinationPath);
     agentImagePublicPath = `/images/agents/${destinationFileName}`;
   }
@@ -532,7 +704,7 @@ export async function build_site_from_listing(
       slug,
     },
     slug,
-    listingImages,
+    listingImages: successfulListingImages,
     agentImagePublicPath,
   });
 
@@ -542,7 +714,7 @@ export async function build_site_from_listing(
   await runAppBuild(paths.app_dir, {
     slug,
     propertyJsonPath,
-    listingImages,
+    listingImages: successfulListingImages,
   });
 
   const builtRoutePath = path.join(

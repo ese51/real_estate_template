@@ -10,9 +10,26 @@ declare const process: {
 declare const Buffer: {
   from: (input: ArrayBuffer) => unknown;
 };
-declare function fetch(input: string): Promise<{
+declare function setTimeout(callback: () => void, delay: number): unknown;
+declare function clearTimeout(timeoutId: unknown): void;
+declare class URL {
+  constructor(input: string);
+  origin: string;
+}
+declare class AbortController {
+  signal: unknown;
+  abort(): void;
+}
+declare function fetch(input: string, init?: {
+  headers?: Record<string, string>;
+  redirect?: string;
+  signal?: unknown;
+}): Promise<{
   ok: boolean;
   status: number;
+  headers?: {
+    entries?: () => IterableIterator<[string, string]>;
+  };
   arrayBuffer: () => Promise<ArrayBuffer>;
 }>;
 
