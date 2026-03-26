@@ -40,6 +40,26 @@ function makePayload(slug, artifactFolderPath) {
   };
 }
 
+async function listRelativeFiles(dirPath) {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      const nestedFiles = await listRelativeFiles(fullPath);
+      for (const nestedFile of nestedFiles) {
+        files.push(path.join(entry.name, nestedFile));
+      }
+      continue;
+    }
+
+    files.push(entry.name);
+  }
+
+  return files.sort();
+}
+
 async function cleanupSlug(slug, artifactFolderPath) {
   await Promise.all([
     fs.rm(path.join(appDir, 'src/data/properties', `${slug}.json`), { force: true }),
@@ -52,11 +72,12 @@ async function cleanupSlug(slug, artifactFolderPath) {
 
 test('builder writes a new property JSON and build includes the slug route', async () => {
   const slug = makeSlug('builder-test');
-  const artifactFolderPath = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const artifactFolderPath = path.join(artifactRoot, 'site');
   const payload = makePayload(slug, artifactFolderPath);
 
   try {
-    const result = await build_site_from_listing(payload, null, true);
+    const result = await build_site_from_listing(payload, null, false);
     const jsonPath = path.join(appDir, 'src/data/properties', `${slug}.json`);
     const routePath = path.join(appDir, 'dist', slug, 'index.html');
 
@@ -72,12 +93,66 @@ test('builder writes a new property JSON and build includes the slug route', asy
     await fs.access(path.join(artifactFolderPath, 'index.html'));
   } finally {
     await cleanupSlug(slug, artifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
+  }
+});
+
+test('builder force_rebuild replaces prior slug outputs on repeated builds', async () => {
+  const slug = makeSlug('builder-rebuild-test');
+  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const artifactFolderPath = path.join(artifactRoot, 'site');
+  const firstPayload = makePayload(slug, artifactFolderPath);
+  const secondPayload = {
+    ...makePayload(slug, artifactFolderPath),
+    address: '777 Rebuild Success Ave',
+    description: 'Second build payload that should replace prior outputs.',
+    image_urls: [
+      path.join(appDir, 'public/images/11940river/entry-1.jpg'),
+    ],
+  };
+
+  try {
+    await build_site_from_listing(firstPayload, null, false);
+
+    const jsonPath = path.join(appDir, 'src/data/properties', `${slug}.json`);
+    const listingImagesDir = path.join(appDir, 'public/images', slug);
+    const routePath = path.join(appDir, 'dist', slug, 'index.html');
+
+    await fs.writeFile(jsonPath, '{"stale":true}\n', 'utf8');
+    await fs.writeFile(path.join(listingImagesDir, 'stale-file.txt'), 'stale\n', 'utf8');
+    await fs.writeFile(path.join(artifactFolderPath, 'stale-artifact.txt'), 'stale\n', 'utf8');
+
+    const result = await build_site_from_listing(secondPayload, null, true);
+
+    assert.equal(result.slug, slug);
+    assert.equal(result.template_id, 'real-estate-template');
+
+    const rebuiltJson = JSON.parse(await fs.readFile(jsonPath, 'utf8'));
+    assert.equal(rebuiltJson.address.street, secondPayload.address);
+    assert.match(rebuiltJson.description, /Second build payload/);
+
+    const imageFiles = await listRelativeFiles(listingImagesDir);
+    assert.deepEqual(imageFiles, ['listing-01.jpg']);
+
+    const artifactFiles = await listRelativeFiles(artifactFolderPath);
+    assert.ok(artifactFiles.includes('index.html'));
+    assert.ok(!artifactFiles.includes('stale-artifact.txt'));
+
+    await assert.rejects(
+      fs.access(path.join(listingImagesDir, 'stale-file.txt'))
+    );
+
+    await fs.access(routePath);
+  } finally {
+    await cleanupSlug(slug, artifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
   }
 });
 
 test('builder CLI returns success when the built route exists', async () => {
   const slug = makeSlug('builder-cli-test');
-  const artifactFolderPath = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
+  const artifactFolderPath = path.join(artifactRoot, 'site');
   const payload = makePayload(slug, artifactFolderPath);
   const payloadPath = path.join(os.tmpdir(), `${slug}.json`);
 
@@ -102,6 +177,7 @@ test('builder CLI returns success when the built route exists', async () => {
     await fs.access(path.join(appDir, 'dist', slug, 'index.html'));
   } finally {
     await cleanupSlug(slug, artifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
     await fs.rm(payloadPath, { force: true });
   }
 });

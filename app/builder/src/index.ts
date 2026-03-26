@@ -59,7 +59,27 @@ async function pathExists(targetPath: string): Promise<boolean> {
   }
 }
 
-async function ensureEmptyDirectory(dirPath: string, force: boolean): Promise<void> {
+async function resetDirectory(dirPath: string): Promise<void> {
+  await fs.rm(dirPath, { recursive: true, force: true });
+  await fs.mkdir(dirPath, { recursive: true });
+}
+
+async function preparePropertyJsonPath(filePath: string, force: boolean): Promise<void> {
+  const exists = await pathExists(filePath);
+  if (!exists) {
+    return;
+  }
+
+  if (!force) {
+    throw new Error(
+      `Property JSON conflict: existing file already exists for this slug. Re-run with force_rebuild=true to replace it: ${filePath}`
+    );
+  }
+
+  await fs.rm(filePath, { force: true });
+}
+
+async function prepareListingImagesDirectory(dirPath: string, force: boolean): Promise<void> {
   const exists = await pathExists(dirPath);
   if (!exists) {
     await fs.mkdir(dirPath, { recursive: true });
@@ -67,22 +87,28 @@ async function ensureEmptyDirectory(dirPath: string, force: boolean): Promise<vo
   }
 
   if (!force) {
-    throw new Error(`Refusing to overwrite existing directory without force_rebuild: ${dirPath}`);
+    throw new Error(
+      `Listing image directory conflict: existing image directory already exists for this slug. Re-run with force_rebuild=true to replace it: ${dirPath}`
+    );
   }
 
-  await fs.rm(dirPath, { recursive: true, force: true });
-  await fs.mkdir(dirPath, { recursive: true });
+  await resetDirectory(dirPath);
 }
 
-async function ensureFileWritable(filePath: string, force: boolean): Promise<void> {
-  const exists = await pathExists(filePath);
-  if (exists && !force) {
-    throw new Error(`Refusing to overwrite existing file without force_rebuild: ${filePath}`);
+async function prepareArtifactDirectory(dirPath: string, force: boolean): Promise<void> {
+  const exists = await pathExists(dirPath);
+  if (!exists) {
+    await fs.mkdir(dirPath, { recursive: true });
+    return;
   }
 
-  if (exists && force) {
-    await fs.rm(filePath, { force: true });
+  if (!force) {
+    throw new Error(
+      `Artifact directory conflict: existing artifact output directory already exists. Re-run with force_rebuild=true to replace it: ${dirPath}`
+    );
   }
+
+  await resetDirectory(dirPath);
 }
 
 function isRemoteUrl(value: string): boolean {
@@ -182,7 +208,7 @@ async function stageArtifact(
   appDir: string,
   distDir: string
 ): Promise<string[]> {
-  await ensureEmptyDirectory(artifactFolderPath, force);
+  await prepareArtifactDirectory(artifactFolderPath, force);
 
   const written: string[] = [];
   for (const entry of template.output_behavior.artifact_entries) {
@@ -206,6 +232,7 @@ function runAppBuild(appDir: string): void {
   const result = spawnSync(npmCommand, ['run', 'build'], {
     cwd: appDir,
     encoding: 'utf8',
+    windowsHide: true,
   });
 
   if (typeof result.stdout === 'string' && result.stdout.length > 0) {
@@ -217,13 +244,13 @@ function runAppBuild(appDir: string): void {
   }
 
   if (result.error) {
-    throw new Error(`Failed to start Astro build process: ${result.error.message}`);
+    throw new Error(`Astro process launch failure: ${result.error.message}`);
   }
 
   if (result.status !== 0) {
     const signalSuffix = result.signal ? ` (signal: ${result.signal})` : '';
     throw new Error(
-      `Astro build process failed with exit code ${result.status ?? 'unknown'}${signalSuffix}`
+      `Astro process exited non-zero: exit code ${result.status ?? 'unknown'}${signalSuffix}`
     );
   }
 }
@@ -242,8 +269,8 @@ export async function build_site_from_listing(
   const listingImagesDir = path.join(paths.listing_images_dir, slug);
   const listingImages = buildListingImages(slug, payload.image_urls, paths.listing_images_dir);
 
-  await ensureFileWritable(propertyJsonPath, force_rebuild);
-  await ensureEmptyDirectory(listingImagesDir, force_rebuild);
+  await preparePropertyJsonPath(propertyJsonPath, force_rebuild);
+  await prepareListingImagesDirectory(listingImagesDir, force_rebuild);
   await fs.mkdir(paths.agent_images_dir, { recursive: true });
 
   const writtenFiles: string[] = [];
@@ -293,7 +320,7 @@ export async function build_site_from_listing(
 
   if (!await pathExists(builtRoutePath)) {
     throw new Error(
-      `Astro build succeeded but expected route is missing from dist: ${builtRoutePath}`
+      `Post-build route missing: Astro build completed but expected route was not generated: ${builtRoutePath}`
     );
   }
 
