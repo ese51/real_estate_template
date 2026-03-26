@@ -4,6 +4,6 @@
   publish = "dist"
 
 [[redirects]]
-  from   = "/1615-n-wakefield-arlington"
-  to     = "/wakefield"
-  status = 301
+  from   = "/wakefield"
+  to     = "/1615nwakefield"
+  status = 200
