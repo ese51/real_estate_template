@@ -10,6 +10,7 @@ import type {
 } from './types';
 
 type Nullable<T> = T | null | undefined;
+const WINDOWS_DRIVE_PATH_PATTERN = /^[a-zA-Z]:[\\/]/;
 
 function isNonEmptyString(value: Nullable<string>): value is string {
   return typeof value === 'string' && value.trim().length > 0;
@@ -48,6 +49,16 @@ function detectExtension(source: string, fallback = '.jpg'): string {
     return ext;
   }
   return fallback;
+}
+
+function resolveArtifactFolderPath(artifactFolderPath: string): string {
+  const trimmedPath = artifactFolderPath.trim();
+
+  if (process.platform !== 'win32' && WINDOWS_DRIVE_PATH_PATTERN.test(trimmedPath)) {
+    throw new Error(`Invalid Windows artifact path on non-Windows host: ${trimmedPath}`);
+  }
+
+  return path.resolve(trimmedPath);
 }
 
 async function pathExists(targetPath: string): Promise<boolean> {
@@ -263,6 +274,9 @@ export async function build_site_from_listing(
 ): Promise<BuildSiteResult> {
   const selectedTemplate = getTemplateDefinition(template);
   validatePayloadForTemplate(payload, selectedTemplate);
+  const resolvedArtifactFolderPath = isNonEmptyString(payload.artifact_folder_path)
+    ? resolveArtifactFolderPath(payload.artifact_folder_path)
+    : null;
 
   const paths = getTemplatePaths();
   const slug = ensureSlug(payload);
@@ -325,10 +339,10 @@ export async function build_site_from_listing(
     );
   }
 
-  if (isNonEmptyString(payload.artifact_folder_path)) {
+  if (resolvedArtifactFolderPath) {
     const artifactFiles = await stageArtifact(
       slug,
-      path.resolve(payload.artifact_folder_path),
+      resolvedArtifactFolderPath,
       force_rebuild,
       selectedTemplate,
       paths.app_dir,

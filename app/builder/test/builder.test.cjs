@@ -97,6 +97,32 @@ test('builder writes a new property JSON and build includes the slug route', asy
   }
 });
 
+test('builder rejects Windows artifact paths on non-Windows hosts before creating repo folders', async () => {
+  if (process.platform === 'win32') {
+    return;
+  }
+
+  const slug = makeSlug('builder-invalid-windows-artifact');
+  const windowsArtifactPath = 'D:\\hivebrain\\real_estate_monitoring\\artifacts\\9250-persimmon-tree-rd-potomac-md';
+  const payload = makePayload(slug, windowsArtifactPath);
+  const accidentalRepoPath = path.join(repoRoot, windowsArtifactPath);
+
+  try {
+    await assert.rejects(
+      build_site_from_listing(payload, null, false),
+      /Invalid Windows artifact path on non-Windows host: D:\\hivebrain\\real_estate_monitoring\\artifacts\\9250-persimmon-tree-rd-potomac-md/
+    );
+
+    await assert.rejects(fs.access(accidentalRepoPath));
+    await assert.rejects(
+      fs.access(path.join(appDir, 'src/data/properties', `${slug}.json`))
+    );
+  } finally {
+    await cleanupSlug(slug, null);
+    await fs.rm(accidentalRepoPath, { recursive: true, force: true });
+  }
+});
+
 test('builder force_rebuild replaces prior slug outputs on repeated builds', async () => {
   const slug = makeSlug('builder-rebuild-test');
   const artifactRoot = await fs.mkdtemp(path.join(os.tmpdir(), `${slug}-artifact-`));
