@@ -43,5 +43,11 @@ declare module 'node:path' {
 }
 
 declare module 'node:child_process' {
-  export function spawnSync(...args: unknown[]): { status: number | null };
+  export function spawnSync(...args: unknown[]): {
+    status: number | null;
+    signal?: string | null;
+    error?: { message: string };
+    stdout?: string;
+    stderr?: string;
+  };
 }

@@ -33,7 +33,7 @@ export async function getStaticPaths() {
     { eager: true }
   );
 
-  const entries = Object.values(modules);
+  const entries = Object.entries(modules);
 
   if (entries.length === 0) {
     throw new Error(
@@ -42,8 +42,14 @@ export async function getStaticPaths() {
     );
   }
 
-  return entries.map((mod) => {
+  return entries.map(([sourcePath, mod]) => {
     const property = mod.default;
+    if (!property?.meta?.slug) {
+      throw new Error(
+        `Property JSON missing required meta.slug for static route generation: ${sourcePath}`
+      );
+    }
+
     // Slug comes from the data, not the filename — stays correct
     // even if the file is renamed.
     return { params: { slug: property.meta.slug }, props: { property } };

@@ -205,11 +205,26 @@ function runAppBuild(appDir: string): void {
   const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   const result = spawnSync(npmCommand, ['run', 'build'], {
     cwd: appDir,
-    stdio: 'inherit',
+    encoding: 'utf8',
   });
 
+  if (typeof result.stdout === 'string' && result.stdout.length > 0) {
+    process.stderr.write(result.stdout);
+  }
+
+  if (typeof result.stderr === 'string' && result.stderr.length > 0) {
+    process.stderr.write(result.stderr);
+  }
+
+  if (result.error) {
+    throw new Error(`Failed to start Astro build process: ${result.error.message}`);
+  }
+
   if (result.status !== 0) {
-    throw new Error(`Astro build failed with exit code ${result.status ?? 'unknown'}`);
+    const signalSuffix = result.signal ? ` (signal: ${result.signal})` : '';
+    throw new Error(
+      `Astro build process failed with exit code ${result.status ?? 'unknown'}${signalSuffix}`
+    );
   }
 }
 
@@ -269,6 +284,18 @@ export async function build_site_from_listing(
   writtenFiles.push(propertyJsonPath);
 
   runAppBuild(paths.app_dir);
+
+  const builtRoutePath = path.join(
+    paths.dist_dir,
+    selectedTemplate.output_behavior.route_path(slug).replace(/^\/+/, ''),
+    'index.html'
+  );
+
+  if (!await pathExists(builtRoutePath)) {
+    throw new Error(
+      `Astro build succeeded but expected route is missing from dist: ${builtRoutePath}`
+    );
+  }
 
   if (isNonEmptyString(payload.artifact_folder_path)) {
     const artifactFiles = await stageArtifact(
