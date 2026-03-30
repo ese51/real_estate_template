@@ -653,15 +653,21 @@ function gitPushListing(options: {
   slug: string;
   propertyJsonPath: string;
   listingImagesDir: string;
+  /** Disk path of the agent image, if one was downloaded for this listing. */
+  agentImageDiskPath?: string;
 }): { commitHash: string; publicUrl: string } {
-  const { repoRoot, branch, slug, propertyJsonPath, listingImagesDir } = options;
+  const { repoRoot, branch, slug, propertyJsonPath, listingImagesDir, agentImageDiskPath } = options;
 
   process.stderr.write(
-    `[publisher] Starting git publish: ${JSON.stringify({ repoRoot, branch, slug, propertyJsonPath, listingImagesDir })}\n`
+    `[publisher] Starting git publish: ${JSON.stringify({ repoRoot, branch, slug, propertyJsonPath, listingImagesDir, agentImageDiskPath: agentImageDiskPath ?? null })}\n`
   );
 
-  // Contract check 3: stage property JSON and listing images.
-  const addResult = runGitCommand(['add', propertyJsonPath, listingImagesDir], repoRoot);
+  // Contract check 3: stage property JSON, listing images, and agent image (if present).
+  const addTargets = [propertyJsonPath, listingImagesDir];
+  if (agentImageDiskPath) {
+    addTargets.push(agentImageDiskPath);
+  }
+  const addResult = runGitCommand(['add', ...addTargets], repoRoot);
   if (addResult.status !== 0) {
     throw new Error(
       `[publisher] git add failed (exit ${addResult.status}). stderr: ${addResult.stderr}`
@@ -780,6 +786,7 @@ export async function build_site_from_listing(
   }
 
   let agentImagePublicPath: string | undefined;
+  let agentImageDiskPath: string | undefined;
   const agentImageSource = [
     payload.agent_image_url,
     typeof payload.listing_agent === 'object' && payload.listing_agent
@@ -794,6 +801,7 @@ export async function build_site_from_listing(
     await copyOrDownloadFile(agentImageSource, destinationPath, remoteDownloadContext);
     writtenFiles.push(destinationPath);
     agentImagePublicPath = `/images/agents/${destinationFileName}`;
+    agentImageDiskPath = destinationPath;
   }
 
   const templateData = selectedTemplate.map_payload_to_template_data({
@@ -865,6 +873,7 @@ export async function build_site_from_listing(
       slug,
       propertyJsonPath,
       listingImagesDir,
+      agentImageDiskPath,
     });
 
     return {
