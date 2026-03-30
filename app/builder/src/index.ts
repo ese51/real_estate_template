@@ -12,6 +12,8 @@ import type {
 type Nullable<T> = T | null | undefined;
 const WINDOWS_DRIVE_PATH_PATTERN = /^[a-zA-Z]:[\\/]/;
 const WINDOWS_ASTRO_BUILD_HEAP_MB = 4096;
+const NETLIFY_SITE_URL = (process.env.NETLIFY_SITE_URL ?? 'https://relistings.netlify.app').replace(/\/$/, '');
+const PUBLISH_BRANCH = process.env.PUBLISH_BRANCH ?? 'main';
 const REMOTE_DOWNLOAD_TIMEOUT_MS = 15000;
 const REMOTE_DOWNLOAD_MAX_ATTEMPTS = 2;
 const RETRYABLE_DOWNLOAD_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -629,6 +631,84 @@ async function runAppBuild(appDir: string, input: BuildDiagnosticInput): Promise
   }
 }
 
+function runGitCommand(args: string[], repoRoot: string): { stdout: string; stderr: string; status: number | null } {
+  const result = spawnSync('git', args, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    shell: false,
+  });
+
+  if (result.error) {
+    throw new Error(`[publisher] git ${args[0]} failed to launch: ${result.error.message}`);
+  }
+
+  const stdout = typeof result.stdout === 'string' ? result.stdout.trim() : '';
+  const stderr = typeof result.stderr === 'string' ? result.stderr.trim() : '';
+  return { stdout, stderr, status: result.status };
+}
+
+function gitPushListing(options: {
+  repoRoot: string;
+  branch: string;
+  slug: string;
+  propertyJsonPath: string;
+  listingImagesDir: string;
+}): { commitHash: string; publicUrl: string } {
+  const { repoRoot, branch, slug, propertyJsonPath, listingImagesDir } = options;
+
+  process.stderr.write(
+    `[publisher] Starting git publish: ${JSON.stringify({ repoRoot, branch, slug, propertyJsonPath, listingImagesDir })}\n`
+  );
+
+  // Stage property JSON and listing images
+  const addResult = runGitCommand(['add', propertyJsonPath, listingImagesDir], repoRoot);
+  if (addResult.status !== 0) {
+    throw new Error(
+      `[publisher] git add failed (exit ${addResult.status}). stderr: ${addResult.stderr}`
+    );
+  }
+
+  // Commit — tolerate "nothing to commit" so force-rebuilds stay safe
+  const commitMessage = `Add listing: ${slug}`;
+  const commitResult = runGitCommand(['commit', '-m', commitMessage], repoRoot);
+  const combinedCommitOutput = `${commitResult.stdout} ${commitResult.stderr}`;
+  const nothingToCommit =
+    combinedCommitOutput.includes('nothing to commit') ||
+    combinedCommitOutput.includes('nothing added to commit');
+
+  if (commitResult.status !== 0 && !nothingToCommit) {
+    throw new Error(
+      `[publisher] git commit failed (exit ${commitResult.status}). stderr: ${commitResult.stderr}`
+    );
+  }
+
+  // Resolve commit hash (HEAD may be the prior commit when nothing changed)
+  const revResult = runGitCommand(['rev-parse', 'HEAD'], repoRoot);
+  const commitHash = revResult.stdout || 'unknown';
+
+  process.stderr.write(
+    `[publisher] Committed: ${JSON.stringify({ commitHash, commitMessage, nothingToCommit })}\n`
+  );
+
+  // Push — fail loudly if this does not succeed
+  const pushResult = runGitCommand(['push', 'origin', branch], repoRoot);
+  if (pushResult.status !== 0) {
+    throw new Error(
+      `[publisher] git push FAILED (exit ${pushResult.status}). ` +
+        `Push to origin/${branch} did not succeed. ` +
+        `repo: ${repoRoot} | stderr: ${pushResult.stderr} | stdout: ${pushResult.stdout}`
+    );
+  }
+
+  const publicUrl = `${NETLIFY_SITE_URL}/${slug}`;
+
+  process.stderr.write(
+    `[publisher] Push succeeded: ${JSON.stringify({ commitHash, branch, repoRoot, publicUrl })}\n`
+  );
+
+  return { commitHash, publicUrl };
+}
+
 export async function build_site_from_listing(
   payload: HiveMindListingPayload,
   template: string | null = null,
@@ -741,13 +821,33 @@ export async function build_site_from_listing(
     writtenFiles.push(...artifactFiles);
   }
 
-  return {
+  const baseResult: BuildSiteResult = {
     slug,
     template_id: selectedTemplate.id,
     dist_dir: paths.dist_dir,
     route_path: selectedTemplate.output_behavior.route_path(slug),
     files_written: writtenFiles,
   };
+
+  if (payload.publish) {
+    const repoRoot = path.resolve(paths.app_dir, '..');
+    const { commitHash, publicUrl } = gitPushListing({
+      repoRoot,
+      branch: PUBLISH_BRANCH,
+      slug,
+      propertyJsonPath,
+      listingImagesDir,
+    });
+
+    return {
+      ...baseResult,
+      published: true,
+      commit_hash: commitHash,
+      public_url: publicUrl,
+    };
+  }
+
+  return baseResult;
 }
 
 export { templateRegistry, defaultTemplate } from './registry';
