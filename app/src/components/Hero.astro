@@ -1,17 +1,15 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
-const { address, price_display, stats, gallery } = property;
+const { property, variant = 'classic' } = Astro.props;
+const { address, gallery, price_display, schedule_showing, stats } = property;
 
-// ─── Curated carousel selection ───────────────────────────────────────────────
-// Priority order: strong exterior first, then key interior spaces.
-// Bathrooms, extras, and floor plans are intentionally excluded.
-// Match by basename without extension so .jpg and .webp both resolve.
 const CAROUSEL_PICKS = [
   'exterior-front',
   'living-1',
@@ -21,120 +19,169 @@ const CAROUSEL_PICKS = [
 ];
 
 const carouselImages = CAROUSEL_PICKS
-  .map(base => gallery.images.find(img => {
-    const file = img.url.split('/').pop() ?? '';
-    return file.replace(/\.\w+$/, '') === base;
-  }))
-  .filter((img): img is NonNullable<typeof img> => !!img);
+  .map((key) => gallery.images.find((image) => image.alt.includes(key)))
+  .filter((image): image is NonNullable<typeof image> => Boolean(image));
 
-// Fallback: single hero image if carousel can't be built
 const slides = carouselImages.length > 0
   ? carouselImages
   : gallery.hero_image
     ? [{ url: gallery.hero_image, alt: address.street }]
     : [];
 
-const hasSlides = slides.length > 0;
-const topStats = [
-  { label: 'List Price', value: price_display },
-  { label: 'Bedrooms', value: stats.beds },
-  { label: 'Bathrooms', value: stats.baths },
-  { label: 'Sq Ft', value: stats.sqft.toLocaleString() },
-  { label: 'Year Built', value: stats.year_built },
-].filter((item) => item.value !== undefined && item.value !== null && item.value !== '');
+const heroStats = [
+  { short: 'Beds', value: String(stats.beds) },
+  { short: 'Baths', value: String(stats.baths) },
+  { short: 'Sq Ft', value: stats.sqft.toLocaleString() },
+];
+
+const heroEyebrow = variant === 'modern'
+  ? 'Contemporary Listing'
+  : variant === 'bold'
+    ? 'Signature Listing'
+    : variant === 'lifestyle'
+      ? 'Life at Home'
+      : 'Private Residence';
+
+const heroLocation = `${address.city}, ${address.state} ${address.zip}`;
+const ctaHref = schedule_showing.enabled ? '#schedule' : '#contact';
+const ctaLabel = schedule_showing.enabled ? 'Schedule a Tour' : 'Contact Agent';
 ---
 
-<section class="hero" id="hero" aria-label="Property hero">
-
-  <!-- ── Carousel layer ─────────────────────────────────────────── -->
-  {hasSlides && (
+<section
+  class:list={[
+    'hero',
+    `hero--${variant}`,
+    variant !== 'classic' && 'hero--muted-on-load',
+  ]}
+  id="hero"
+  aria-label="Property hero"
+>
+  {slides.length > 0 && (
     <div class="hero__carousel" aria-hidden="true">
-      {slides.map((img, i) => (
+      {slides.map((image, index) => (
         <div
-          class={`hero__slide${i === 0 ? ' is-active' : ''}`}
-          style={`background-image: url('${img.url}')`}
+          class:list={['hero__slide', index === 0 && 'is-active']}
+          style={`background-image: url('${image.url}')`}
         ></div>
       ))}
     </div>
   )}
 
-  <!-- ── Top fade: nav readability only ───────────────────────── -->
   <div class="hero__top-fade" aria-hidden="true"></div>
+  <div class="hero__bottom-scrim" aria-hidden="true"></div>
 
-  <!-- spacer pushes stats strip to the bottom -->
-  <div class="hero__spacer" aria-hidden="true"></div>
-
-  <!-- ── Stats strip ────────────────────────────────────────────── -->
-  <div class="hero__stats-strip">
+  <div class="hero__content-wrap">
     <div class="container">
-      <div class="hero__stats">
-        {topStats.map((item, index) => (
-          <>
-            <div class="hero__stat">
-              <span class="hero__stat-num">{item.value}</span>
-              <span class="hero__stat-label">{item.label}</span>
-            </div>
-            {index < topStats.length - 1 && (
-              <div class="hero__stat-sep" aria-hidden="true"></div>
-            )}
-          </>
-        ))}
+      <div class="hero__cluster">
+        <span class="hero__eyebrow">{heroEyebrow}</span>
+        <h1>{address.street}</h1>
+        <p class="hero__location">{heroLocation}</p>
+
+        <div class="hero__meta">
+          <span class="hero__price">{price_display}</span>
+
+          <div class="hero__stats" aria-label="Property highlights">
+            {heroStats.map((item) => (
+              <span class="hero__stat">
+                <strong>{item.value}</strong>
+                <span>{item.short}</span>
+              </span>
+            ))}
+          </div>
+
+          <a href={ctaHref} class="hero__cta">{ctaLabel}</a>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ── Dot indicators ─────────────────────────────────────────── -->
   {slides.length > 1 && (
-    <div class="hero__dots" role="tablist" aria-label="Carousel controls">
-      {slides.map((_, i) => (
+    <div class="hero__dots" role="tablist" aria-label="Hero image selection">
+      {slides.map((_, index) => (
         <button
-          class={`hero__dot${i === 0 ? ' is-active' : ''}`}
-          data-index={i}
+          class:list={['hero__dot', index === 0 && 'is-active']}
+          data-index={index}
           role="tab"
-          aria-label={`Photo ${i + 1} of ${slides.length}`}
-          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-label={`Photo ${index + 1} of ${slides.length}`}
+          aria-selected={index === 0 ? 'true' : 'false'}
         ></button>
       ))}
     </div>
   )}
-
 </section>
 
-<!-- ── Carousel script ──────────────────────────────────────────── -->
 <script>
-  (function () {
-    const slides = Array.from(document.querySelectorAll<HTMLElement>('.hero__slide'));
-    const dots   = Array.from(document.querySelectorAll<HTMLElement>('.hero__dot'));
-    if (slides.length <= 1) return;
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    const slides = Array.from(hero.querySelectorAll('.hero__slide'));
+    const dots = Array.from(hero.querySelectorAll('.hero__dot'));
 
-    let current = 0;
-    let timer: ReturnType<typeof setInterval>;
+    if (slides.length > 1 && dots.length === slides.length) {
+      let current = 0;
+      let timer = window.setInterval(next, 6000);
 
-    function goTo(index: number) {
-      slides[current].classList.remove('is-active');
-      dots[current]?.classList.remove('is-active');
-      dots[current]?.setAttribute('aria-selected', 'false');
-      current = index;
-      slides[current].classList.add('is-active');
-      dots[current]?.classList.add('is-active');
-      dots[current]?.setAttribute('aria-selected', 'true');
-    }
+      function goTo(index: number) {
+        current = (index + slides.length) % slides.length;
 
-    function start() {
-      timer = setInterval(() => goTo((current + 1) % slides.length), 6000);
-    }
+        slides.forEach((slide, slideIndex) => {
+          slide.classList.toggle('is-active', slideIndex === current);
+        });
 
-    // Dot click: jump to slide and restart timer
-    dots.forEach((dot, i) => {
-      dot.addEventListener('click', () => {
-        clearInterval(timer);
-        goTo(i);
-        start();
+        dots.forEach((dot, dotIndex) => {
+          const isActive = dotIndex === current;
+          dot.classList.toggle('is-active', isActive);
+          dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+      }
+
+      function next() {
+        goTo(current + 1);
+      }
+
+      function restart() {
+        window.clearInterval(timer);
+        timer = window.setInterval(next, 6000);
+      }
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          goTo(index);
+          restart();
+        });
       });
-    });
+    }
 
-    start();
-  })();
+    if (hero.classList.contains('hero--muted-on-load')) {
+      let engaged = false;
+      let fallbackTimer = window.setTimeout(engageHero, 2600);
+
+      function engageHero() {
+        if (engaged) return;
+        engaged = true;
+        hero.classList.add('is-engaged');
+        cleanup();
+      }
+
+      function cleanup() {
+        window.clearTimeout(fallbackTimer);
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('pointermove', engageHero);
+        window.removeEventListener('touchstart', engageHero);
+        window.removeEventListener('keydown', engageHero);
+      }
+
+      function handleScroll() {
+        if (window.scrollY > 0) {
+          engageHero();
+        }
+      }
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('pointermove', engageHero, { passive: true });
+      window.addEventListener('touchstart', engageHero, { passive: true });
+      window.addEventListener('keydown', engageHero);
+    }
+  }
 </script>
 
 <style lang="scss">
@@ -143,163 +190,497 @@ const topStats = [
   .hero {
     position: relative;
     height: 100svh;
-    min-height: 600px;
-    display: flex;
-    flex-direction: column;
-    // Dark fallback shown before images load or when no slides exist
-    background: #141420;
+    min-height: 40rem;
     overflow: hidden;
-
-    // Mobile: reduce height so landscape photos aren't cropped to a thin
-    // vertical strip. 70svh with a lower min-height keeps the hero
-    // impactful while showing ~35% more image width than 100svh.
-    @media (max-width: $bp-md) {
-      height: 72svh;
-      min-height: 400px;
-    }
-  }
-
-  // ── Carousel ─────────────────────────────────────────────────────
-
-  .hero__carousel {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .hero__slide {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    opacity: 0;
-    // Slightly longer than the JS interval to ensure seamless crossfade
-    transition: opacity 1.8s ease-in-out;
-
-    &.is-active {
-      opacity: 1;
-    }
-
-    // On mobile, anchor to the upper portion of the image.
-    // For landscape photos (common for exteriors) the crop is purely
-    // horizontal and position-y has no effect — but for any near-square
-    // or portrait shots, this keeps rooflines and upper facades visible.
-    @media (max-width: $bp-md) {
-      background-position: center 20%;
-    }
-  }
-
-  // ── Gradient overlays ─────────────────────────────────────────────
-
-  // Top-of-page gradient — keeps nav text readable without dimming the image
-  .hero__top-fade {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 180px;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.38) 0%,
-      rgba(0, 0, 0, 0.12) 55%,
-      transparent 100%
-    );
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  // Spacer fills the middle, pushing the stats strip to the bottom
-  .hero__spacer {
-    flex: 1;
-  }
-
-  // ── Stats strip ──────────────────────────────────────────────────
-
-  .hero__stats-strip {
-    position: relative;
-    z-index: 2;
-    background: rgba(0, 0, 0, 0.22);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .hero__stats {
-    display: flex;
-    align-items: stretch;
-    overflow-x: auto;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-  }
-
-  .hero__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.18rem;
-    padding: 1.3rem 2rem;
-    flex-shrink: 0;
-
-    @media (max-width: $bp-md) {
-      padding: 1.1rem 1.4rem;
-    }
-  }
-
-  .hero__stat-num {
-    font-family: $font-serif;
-    font-size: 1.25rem;
-    font-weight: 400;
+    background: #151824;
     color: #fff;
-    line-height: 1;
-    white-space: nowrap;
-  }
 
-  .hero__stat-label {
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.42);
-    white-space: nowrap;
-  }
+    @media (max-width: $bp-md) {
+      min-height: 33rem;
+    }
 
-  .hero__stat-sep {
-    width: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    align-self: stretch;
-    flex-shrink: 0;
-  }
+    &__carousel,
+    &__slide {
+      position: absolute;
+      inset: 0;
+    }
 
-  // ── Dot indicators ───────────────────────────────────────────────
+    &__slide {
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.025);
+      transition:
+        opacity 0.9s ease,
+        transform 6s ease;
 
-  .hero__dots {
-    position: absolute;
-    bottom: 84px; // just above the stats strip
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 3;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
+      &.is-active {
+        opacity: 1;
+        transform: scale(1);
+      }
 
-  .hero__dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.38);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.3s ease;
+      @media (max-width: $bp-md) {
+        background-position: center 22%;
+      }
+    }
 
-    &.is-active {
+    &__top-fade,
+    &__bottom-scrim {
+      position: absolute;
+      inset-inline: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    &__top-fade {
+      top: 0;
+      height: 10rem;
+      background: linear-gradient(180deg, rgba(11, 13, 20, 0.66) 0%, rgba(11, 13, 20, 0.28) 48%, rgba(11, 13, 20, 0) 100%);
+    }
+
+    &__bottom-scrim {
+      bottom: 0;
+      height: min(55vh, 28rem);
+      background: linear-gradient(180deg, rgba(11, 13, 20, 0) 0%, rgba(11, 13, 20, 0.18) 32%, rgba(11, 13, 20, 0.68) 100%);
+    }
+
+    &__content-wrap {
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 2;
+      padding-bottom: clamp(2rem, 4vw, 3rem);
+    }
+
+    &__cluster {
+      display: grid;
+      gap: 0.95rem;
+      max-width: min(44rem, 100%);
+      transition:
+        opacity 0.45s ease,
+        transform 0.45s ease,
+        filter 0.45s ease;
+    }
+
+    &__eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.9);
+      transition:
+        opacity 0.38s ease,
+        background 0.38s ease,
+        border-color 0.38s ease,
+        box-shadow 0.38s ease;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 16ch;
+      color: #fff;
+      font-size: clamp(2.45rem, 5vw, 4.9rem);
+      line-height: 0.95;
+      text-wrap: balance;
+      transition: opacity 0.38s ease, transform 0.38s ease;
+    }
+
+    &__location {
+      margin: 0;
+      font-size: clamp(0.98rem, 1.4vw, 1.15rem);
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.8);
+      transition: opacity 0.38s ease, color 0.38s ease;
+    }
+
+    &__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.9rem 1rem;
+    }
+
+    &__price {
+      display: inline-flex;
+      align-items: center;
+      min-height: 3rem;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      transition:
+        opacity 0.38s ease,
+        background 0.38s ease,
+        border-color 0.38s ease,
+        box-shadow 0.38s ease;
+    }
+
+    &__stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    &__stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-height: 3rem;
+      padding: 0.72rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 0.95rem;
+      transition:
+        opacity 0.38s ease,
+        background 0.38s ease,
+        border-color 0.38s ease,
+        box-shadow 0.38s ease,
+        color 0.38s ease;
+
+      strong {
+        font-size: 0.98rem;
+        font-weight: 600;
+        color: #fff;
+        transition: color 0.38s ease;
+      }
+
+      span:last-child {
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+    }
+
+    &__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3rem;
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #10131c;
       background: #fff;
-      transform: scale(1.4);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition:
+        opacity 0.38s ease,
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.38s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      }
     }
 
-    &:hover:not(.is-active) {
-      background: rgba(255, 255, 255, 0.65);
+    &__dots {
+      position: absolute;
+      left: 50%;
+      bottom: 1.2rem;
+      z-index: 3;
+      display: flex;
+      gap: 0.55rem;
+      transform: translateX(-50%);
+
+      @media (max-width: $bp-md) {
+        bottom: 0.9rem;
+      }
+    }
+
+    &__dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.44);
+      background: rgba(255, 255, 255, 0.32);
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+
+      &.is-active {
+        background: #fff;
+        border-color: #fff;
+        transform: scale(1.08);
+      }
+    }
+
+    @media (max-width: $bp-md) {
+      &__content-wrap {
+        padding-bottom: 3.35rem;
+      }
+
+      &__cluster {
+        gap: 0.8rem;
+        max-width: 100%;
+      }
+
+      &__eyebrow {
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+      }
+
+      &__meta {
+        gap: 0.65rem;
+      }
+
+      &__price,
+      &__stat,
+      &__cta {
+        min-height: 2.7rem;
+      }
+
+      &__stats {
+        gap: 0.55rem;
+      }
+
+      &__stat {
+        padding-inline: 0.85rem;
+        font-size: 0.88rem;
+      }
+    }
+
+    &--muted-on-load:not(.is-engaged) {
+      .hero__cluster {
+        opacity: 0.93;
+      }
+
+      h1 {
+        opacity: 0.58;
+      }
+
+      .hero__location {
+        opacity: 0.62;
+      }
+
+      .hero__eyebrow {
+        opacity: 0.48;
+      }
+
+      .hero__price {
+        opacity: 0.6;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.14);
+      }
+
+      .hero__stat {
+        opacity: 0.6;
+        background: rgba(255, 255, 255, 0.075);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .hero__cta {
+        opacity: 0.56;
+        box-shadow: none;
+      }
     }
   }
 
+  .hero--classic {
+    h1 {
+      font-family: $font-serif;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    .hero__price,
+    .hero__stat,
+    .hero__eyebrow {
+      background: rgba(14, 16, 24, 0.28);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .hero__cta {
+      background: rgba(255, 255, 255, 0.96);
+      color: #161824;
+    }
+  }
+
+  .hero--modern {
+    .hero__cluster {
+      max-width: min(40rem, 100%);
+    }
+
+    h1 {
+      font-family: $font-sans;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+    }
+
+    .hero__eyebrow,
+    .hero__price,
+    .hero__stat {
+      background: rgba(14, 17, 26, 0.26);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .hero__cta {
+      background: #10131b;
+      color: #fff;
+      border-color: rgba(16, 19, 27, 0.66);
+      box-shadow: 0 12px 30px rgba(8, 10, 16, 0.2);
+    }
+
+    &.hero--muted-on-load:not(.is-engaged) {
+      .hero__eyebrow,
+      .hero__price,
+      .hero__stat {
+        background: rgba(14, 17, 26, 0.18);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .hero__cta {
+        background: rgba(16, 19, 27, 0.82);
+        border-color: rgba(16, 19, 27, 0.4);
+      }
+    }
+  }
+
+  .hero--bold {
+    .hero__cluster {
+      max-width: min(33rem, 100%);
+      gap: 0.75rem;
+    }
+
+    .hero__eyebrow {
+      border-radius: 0.3rem;
+      background: rgba(255, 255, 255, 0.92);
+      border: 2px solid #0d0f16;
+      color: #0d0f16;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: 0.4rem 0.4rem 0 #0d0f16;
+    }
+
+    h1 {
+      font-family: $font-sans;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      max-width: 11ch;
+    }
+
+    .hero__location {
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.84);
+    }
+
+    .hero__price,
+    .hero__stat {
+      border-radius: 0.4rem;
+      background: rgba(255, 255, 255, 0.92);
+      border: 2px solid #0d0f16;
+      color: #0d0f16;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: 0.38rem 0.38rem 0 #0d0f16;
+    }
+
+    .hero__stat {
+      strong {
+        color: #0d0f16;
+      }
+    }
+
+    .hero__cta {
+      border-radius: 0.4rem;
+      background: rgba(255, 255, 255, 0.94);
+      color: #0d0f16;
+      border: 2px solid #0d0f16;
+      box-shadow: 0.38rem 0.38rem 0 #0d0f16;
+
+      &:hover {
+        transform: translate(0.12rem, 0.12rem);
+        box-shadow: 0.26rem 0.26rem 0 #0d0f16;
+      }
+    }
+
+    &.hero--muted-on-load:not(.is-engaged) {
+      .hero__eyebrow,
+      .hero__price,
+      .hero__stat {
+        opacity: 0.5;
+        box-shadow: 0.2rem 0.2rem 0 #0d0f16;
+      }
+
+      .hero__cta {
+        opacity: 0.48;
+        background: rgba(255, 255, 255, 0.72);
+        border-color: rgba(13, 15, 22, 0.86);
+        box-shadow: 0.18rem 0.18rem 0 #0d0f16;
+      }
+    }
+  }
+
+  .hero--lifestyle {
+    .hero__bottom-scrim {
+      background: linear-gradient(180deg, rgba(34, 28, 24, 0) 0%, rgba(34, 28, 24, 0.16) 34%, rgba(34, 28, 24, 0.7) 100%);
+    }
+
+    .hero__cluster {
+      max-width: min(42rem, 100%);
+    }
+
+    h1 {
+      font-family: $font-sans;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+    }
+
+    .hero__eyebrow,
+    .hero__price,
+    .hero__stat {
+      background: rgba(247, 241, 234, 0.16);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .hero__cta {
+      background: #f3ece5;
+      color: #29231d;
+      border-color: rgba(243, 236, 229, 0.6);
+      box-shadow: 0 12px 28px rgba(30, 24, 20, 0.16);
+    }
+
+    &.hero--muted-on-load:not(.is-engaged) {
+      .hero__eyebrow,
+      .hero__price,
+      .hero__stat {
+        background: rgba(247, 241, 234, 0.1);
+        border-color: rgba(255, 255, 255, 0.14);
+      }
+
+      .hero__cta {
+        background: rgba(243, 236, 229, 0.86);
+        border-color: rgba(243, 236, 229, 0.34);
+      }
+    }
+  }
 </style>

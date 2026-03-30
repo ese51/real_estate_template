@@ -1,20 +1,102 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { stats, price_display, status, address } = property;
 
 const specs = [
   { label: 'Beds',   value: stats.beds.toString() },
   { label: 'Baths',  value: stats.baths.toString() },
   { label: 'Sq Ft',  value: stats.sqft.toLocaleString() },
+  ...(stats.lot_size ? [{ label: 'Lot Size', value: stats.lot_size }] : []),
+  ...(stats.year_built ? [{ label: 'Year Built', value: String(stats.year_built) }] : []),
+  ...(stats.garage ? [{ label: 'Garage', value: stats.garage }] : []),
+  ...(stats.style ? [{ label: 'Style', value: stats.style }] : []),
 ];
 ---
 
+{variant === 'modern' ? (
+  <section class="summary summary--modern section" id="summary" aria-label="Property specifications">
+    <div class="container">
+      <div class="summary__modern-shell">
+        <div class="summary__modern-header">
+          <div>
+            <span class="section-label">Property Summary</span>
+            <h2>Everything you need at a glance</h2>
+          </div>
+          <div class="summary__modern-price">
+            <span class="summary__status">{status}</span>
+            <strong>{price_display}</strong>
+            <span>{address.full}</span>
+          </div>
+        </div>
+
+        <div class="summary__modern-grid">
+          {specs.map((spec) => (
+            <div class="summary__modern-card">
+              <span>{spec.label}</span>
+              <strong>{spec.value}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+) : variant === 'lifestyle' ? (
+  <section class="summary summary--lifestyle section" id="summary" aria-label="Property specifications">
+    <div class="container">
+      <div class="summary__lifestyle-shell">
+        <div class="summary__lifestyle-header">
+          <div>
+            <span class="section-label">Property Summary</span>
+            <h2>The essentials, framed around how the home lives</h2>
+          </div>
+          <div class="summary__lifestyle-price">
+            <span class="summary__status">{status}</span>
+            <strong>{price_display}</strong>
+            <span>{address.full}</span>
+          </div>
+        </div>
+
+        <div class="summary__lifestyle-grid">
+          {specs.map((spec) => (
+            <div class="summary__lifestyle-card">
+              <span>{spec.label}</span>
+              <strong>{spec.value}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+) : variant === 'bold' ? (
+  <section class="summary summary--bold section" id="summary" aria-label="Property specifications">
+    <div class="container">
+      <div class="summary__bold-shell">
+        <div class="summary__bold-header">
+          <span class="summary__status">{status}</span>
+          <strong class="summary__bold-price">{price_display}</strong>
+          <span class="summary__bold-address">{address.full}</span>
+        </div>
+
+        <div class="summary__bold-grid">
+          {specs.map((spec) => (
+            <div class="summary__bold-card">
+              <span>{spec.label}</span>
+              <strong>{spec.value}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+) : (
 <div class="summary" id="summary" aria-label="Property specifications">
   <div class="summary__strip">
     <div class="summary__inner">
@@ -44,6 +126,7 @@ const specs = [
     </div>
   </div>
 </div>
+)}
 
 <style lang="scss">
   @use '../styles/variables' as *;
@@ -170,6 +253,336 @@ const specs = [
       background: $color-border;
       flex-shrink: 0;
       margin: 0.75rem 0;
+    }
+
+    &--modern {
+      position: static;
+      top: auto;
+      z-index: auto;
+      padding-top: 2.5rem;
+
+      .summary__modern-shell {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        background: var(--modern-surface-glass);
+        box-shadow: var(--modern-shadow);
+        padding: var(--modern-panel-padding);
+      }
+
+      .summary__modern-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.5rem;
+        align-items: end;
+
+        @media (max-width: $bp-md) {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        h2 {
+          margin-top: 0.55rem;
+          font-size: clamp(1.85rem, 3vw, 2.8rem);
+        }
+      }
+
+      .summary__modern-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.35rem;
+        min-width: 220px;
+
+        @media (max-width: $bp-md) {
+          align-items: flex-start;
+        }
+
+        strong {
+          font-family: var(--modern-font-heading);
+          font-size: clamp(1.6rem, 2vw, 2.2rem);
+          color: var(--modern-text);
+        }
+
+        span:last-child {
+          font-size: 0.88rem;
+          color: var(--modern-muted);
+        }
+      }
+
+      .summary__status {
+        width: fit-content;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        color: var(--modern-text);
+        padding: 0.4rem 0.75rem;
+      }
+
+      .summary__modern-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.95rem;
+        margin-top: 1.6rem;
+
+        @media (max-width: $bp-lg) {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        @media (max-width: $bp-md) {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (max-width: $bp-sm) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .summary__modern-card {
+        padding: 1.15rem;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: var(--modern-radius-md);
+        background: var(--modern-surface-muted);
+
+        span {
+          display: block;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--modern-muted);
+        }
+
+        strong {
+          display: block;
+          margin-top: 0.45rem;
+          font-family: var(--modern-font-heading);
+          font-size: 1.15rem;
+          color: var(--modern-text);
+        }
+      }
+    }
+
+    &--bold {
+      position: static;
+      z-index: auto;
+      padding-top: 1.5rem;
+
+      .summary__bold-shell {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow);
+      }
+
+      .summary__bold-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 1.15rem 1.25rem;
+        border-bottom: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-surface-alt);
+      }
+
+      .summary__status {
+        width: fit-content;
+        padding: 0.35rem 0.7rem;
+        border-radius: var(--bold-radius);
+        border: var(--bold-border-width) solid var(--bold-border);
+        background: #fff;
+        color: var(--bold-text);
+      }
+
+      .summary__bold-price {
+        font-family: var(--bold-font-heading);
+        font-size: clamp(1.5rem, 2vw, 2rem);
+        color: var(--bold-text);
+      }
+
+      .summary__bold-address {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--bold-muted);
+      }
+
+      .summary__bold-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        @media (max-width: $bp-lg) {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (max-width: $bp-sm) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .summary__bold-card {
+        padding: 1rem 1.1rem 1.05rem;
+        border-right: var(--bold-border-width) solid var(--bold-border);
+        border-bottom: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-surface);
+
+        &:nth-child(4n) {
+          border-right: none;
+        }
+
+        @media (max-width: $bp-lg) {
+          &:nth-child(2n) {
+            border-right: none;
+          }
+
+          &:nth-child(4n) {
+            border-right: var(--bold-border-width) solid var(--bold-border);
+          }
+        }
+
+        @media (max-width: $bp-sm) {
+          border-right: none !important;
+        }
+
+        &:nth-last-child(-n + 4) {
+          border-bottom: none;
+        }
+
+        @media (max-width: $bp-lg) {
+          &:nth-last-child(-n + 2) {
+            border-bottom: none;
+          }
+        }
+
+        @media (max-width: $bp-sm) {
+          &:not(:last-child) {
+            border-bottom: var(--bold-border-width) solid var(--bold-border);
+          }
+        }
+
+        span {
+          display: block;
+          font-size: 0.68rem;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--bold-accent);
+        }
+
+        strong {
+          display: block;
+          margin-top: 0.35rem;
+          font-family: var(--bold-font-heading);
+          font-size: 1.12rem;
+          color: var(--bold-text);
+        }
+      }
+    }
+
+    &--lifestyle {
+      position: static;
+      top: auto;
+      z-index: auto;
+      padding-top: 2.75rem;
+
+      .summary__lifestyle-shell {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: calc(var(--lifestyle-radius) + 2px);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+        padding: var(--lifestyle-panel-padding);
+      }
+
+      .summary__lifestyle-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.5rem;
+        align-items: end;
+
+        @media (max-width: $bp-md) {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        h2 {
+          margin-top: 0.55rem;
+          font-size: clamp(1.95rem, 3vw, 2.95rem);
+          max-width: 18ch;
+        }
+      }
+
+      .summary__lifestyle-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.35rem;
+        min-width: 220px;
+
+        @media (max-width: $bp-md) {
+          align-items: flex-start;
+        }
+
+        strong {
+          font-family: var(--lifestyle-font-heading);
+          font-size: clamp(1.65rem, 2vw, 2.25rem);
+          color: var(--lifestyle-text);
+          font-weight: 600;
+        }
+
+        span:last-child {
+          font-size: 0.88rem;
+          color: var(--lifestyle-muted);
+        }
+      }
+
+      .summary__status {
+        width: fit-content;
+        border-radius: 999px;
+        background: var(--lifestyle-accent-soft);
+        color: var(--lifestyle-accent);
+        padding: 0.42rem 0.8rem;
+      }
+
+      .summary__lifestyle-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.95rem;
+        margin-top: 1.6rem;
+
+        @media (max-width: $bp-lg) {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        @media (max-width: $bp-md) {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (max-width: $bp-sm) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .summary__lifestyle-card {
+        padding: 1.15rem;
+        border: 1px solid rgba(104, 90, 72, 0.12);
+        border-radius: var(--lifestyle-radius-md);
+        background: var(--lifestyle-surface-strong);
+
+        span {
+          display: block;
+          font-size: 0.68rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--lifestyle-muted);
+        }
+
+        strong {
+          display: block;
+          margin-top: 0.45rem;
+          font-family: var(--lifestyle-font-heading);
+          font-size: 1.12rem;
+          color: var(--lifestyle-text);
+          font-weight: 600;
+        }
+      }
     }
   }
 </style>

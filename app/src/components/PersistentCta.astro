@@ -1,0 +1,449 @@
+---
+import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
+
+interface Props {
+  property: PropertyData;
+  templateId: SiteTemplateId;
+}
+
+const { property, templateId } = Astro.props;
+const { schedule_showing, agent, price_display, address, stats } = property;
+
+const phoneHref = agent.phone ? `tel:${agent.phone.replace(/\D/g, '')}` : undefined;
+const emailHref = agent.email ? `mailto:${agent.email}?subject=Inquiry: ${address.full}` : undefined;
+const primaryHref = schedule_showing.enabled ? '#schedule' : phoneHref ?? emailHref ?? '#contact';
+const primaryLabel = schedule_showing.enabled ? 'Schedule a Tour' : 'Contact Agent';
+const shouldRenderCta = (templateId === 'modern' || templateId === 'bold' || templateId === 'lifestyle') && Boolean(primaryHref);
+---
+
+{shouldRenderCta && (
+  <>
+    <script>
+      (function () {
+        const heroEl = document.getElementById('hero');
+        const desktopCtaEl = document.querySelector('.persistent-cta--desktop');
+        const mobileCtaEl = document.querySelector('.persistent-cta--mobile');
+        if (!heroEl) return;
+        function sync() {
+          const pastHero = heroEl.getBoundingClientRect().bottom < 80;
+          desktopCtaEl?.classList.toggle('is-visible', pastHero);
+          mobileCtaEl?.classList.toggle('is-past-hero', pastHero);
+        }
+        window.addEventListener('scroll', sync, { passive: true });
+        sync();
+      })();
+    </script>
+
+    <aside class:list={['persistent-cta', 'persistent-cta--desktop', templateId === 'bold' && 'persistent-cta--bold', templateId === 'lifestyle' && 'persistent-cta--lifestyle']} aria-label="Contact quick actions">
+      <div class="persistent-cta__card">
+        <p class="persistent-cta__eyebrow">Private Showing</p>
+        <h2 class="persistent-cta__price">{price_display}</h2>
+        <p class="persistent-cta__address">{address.street}</p>
+        <p class="persistent-cta__stats">
+          {stats.beds} bd · {stats.baths} ba · {stats.sqft.toLocaleString()} sq ft
+        </p>
+
+        <div class="persistent-cta__agent">
+          <span class="persistent-cta__agent-label">Listing Agent</span>
+          <strong>{agent.name}</strong>
+          {agent.title && <span>{agent.title}</span>}
+        </div>
+
+        <a href={primaryHref} class="persistent-cta__primary">
+          {primaryLabel}
+        </a>
+
+        <div class="persistent-cta__links">
+          {phoneHref && <a href={phoneHref}>{agent.phone}</a>}
+          {emailHref && <a href={emailHref}>Email Agent</a>}
+        </div>
+      </div>
+    </aside>
+
+    <div class:list={['persistent-cta', 'persistent-cta--mobile', templateId === 'bold' && 'persistent-cta--bold', templateId === 'lifestyle' && 'persistent-cta--lifestyle']} aria-label="Mobile contact actions">
+      <div class="persistent-cta__mobile-bar">
+        <div class="persistent-cta__mobile-copy">
+          <strong>{price_display}</strong>
+          <span>{address.street}</span>
+        </div>
+        <a href={primaryHref} class="persistent-cta__mobile-action">
+          {schedule_showing.enabled ? 'Tour' : 'Contact'}
+        </a>
+      </div>
+    </div>
+  </>
+)}
+
+<style lang="scss">
+  @use '../styles/variables' as *;
+
+  .persistent-cta {
+    &--desktop {
+      position: fixed;
+      right: max(1.5rem, calc((100vw - #{$container-max}) / 2 + 1.5rem));
+      top: 104px;
+      z-index: 80;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(6px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+
+      &.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+      }
+
+      @media (max-width: 1380px) {
+        right: 1.5rem;
+      }
+
+      @media (max-width: $bp-xl) {
+        display: none;
+      }
+    }
+
+    &--mobile {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 90;
+      display: none;
+      padding: 0.75rem 0.9rem calc(0.75rem + env(safe-area-inset-bottom));
+
+      @media (max-width: $bp-xl) {
+        display: block;
+      }
+
+      // Hero phase: dark ghost bar — house shows through
+      .persistent-cta__mobile-bar {
+        background: rgba(0, 0, 0, 0.52);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: none;
+        transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .persistent-cta__mobile-copy {
+        strong { color: rgba(255, 255, 255, 0.92); }
+        span { color: rgba(255, 255, 255, 0.55); }
+      }
+
+      .persistent-cta__mobile-action {
+        background: rgba(255, 255, 255, 0.14);
+        color: rgba(255, 255, 255, 0.9);
+        border-radius: 999px;
+      }
+
+      // Past-hero: restore modern light chrome
+      &.is-past-hero {
+        .persistent-cta__mobile-bar {
+          background: rgba(255, 255, 255, 0.86);
+          backdrop-filter: blur(14px);
+          border: 1px solid rgba(148, 163, 184, 0.18);
+          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .persistent-cta__mobile-copy {
+          strong { color: #0f172a; }
+          span { color: #64748b; }
+        }
+
+        .persistent-cta__mobile-action {
+          background: rgba(15, 23, 42, 0.05);
+          color: #0f172a;
+        }
+      }
+    }
+
+    &__card {
+      width: 272px;
+      padding: 1.2rem;
+      border: 1px solid var(--modern-border);
+      border-radius: var(--modern-radius);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--modern-shadow-lg);
+    }
+
+    &__eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    &__price {
+      margin-top: 0.55rem;
+      font-family: var(--modern-font-heading);
+      font-size: 1.75rem;
+      line-height: 1.05;
+      color: #0f172a;
+    }
+
+    &__address {
+      margin-top: 0.45rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    &__stats {
+      margin-top: 0.35rem;
+      font-size: 0.83rem;
+      color: #475569;
+    }
+
+    &__agent {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      margin-top: 1.15rem;
+      padding-top: 1.05rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.22);
+
+      strong {
+        font-size: 0.94rem;
+        color: #0f172a;
+      }
+
+      span {
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+    }
+
+    &__agent-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    &__primary {
+      display: block;
+      margin-top: 1.2rem;
+      padding: 0.95rem 1rem;
+      border-radius: var(--modern-button-radius);
+      background: var(--modern-accent);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+      &:hover {
+        background: #1e293b;
+        transform: translateY(-1px);
+        box-shadow: var(--modern-shadow-hover);
+      }
+    }
+
+    &__links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-top: 0.95rem;
+
+      a {
+        font-size: 0.84rem;
+        color: #334155;
+
+        &:hover {
+          color: #0f172a;
+        }
+      }
+    }
+
+    &__mobile-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.9rem;
+      padding: 0.7rem 0.8rem;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--modern-radius-sm);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    &__mobile-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      strong {
+        font-size: 0.88rem;
+        color: #0f172a;
+      }
+
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.72rem;
+        color: #64748b;
+      }
+    }
+
+    &__mobile-action {
+      flex-shrink: 0;
+      padding: 0.62rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.05);
+      color: #0f172a;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    &--bold {
+      .persistent-cta__card {
+        width: 264px;
+        padding: 1rem;
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow-lg);
+        backdrop-filter: none;
+      }
+
+      .persistent-cta__eyebrow,
+      .persistent-cta__agent-label {
+        color: var(--bold-accent);
+      }
+
+      .persistent-cta__price {
+        font-family: var(--bold-font-heading);
+        color: var(--bold-text);
+      }
+
+      .persistent-cta__address,
+      .persistent-cta__agent strong,
+      .persistent-cta__links a {
+        color: var(--bold-text);
+      }
+
+      .persistent-cta__stats,
+      .persistent-cta__agent span {
+        color: var(--bold-muted);
+      }
+
+      .persistent-cta__primary {
+        border-radius: var(--bold-radius);
+        border: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-accent);
+        box-shadow: 4px 4px 0 var(--bold-border);
+
+        &:hover {
+          background: #1e42b8;
+          transform: translate(-1px, -1px);
+          box-shadow: 5px 5px 0 var(--bold-border);
+        }
+      }
+
+      // Bold mobile: apply full personality only after scrolling past hero
+      &.persistent-cta--mobile.is-past-hero {
+        .persistent-cta__mobile-bar {
+          padding: 0.62rem 0.72rem;
+          border: var(--bold-border-width) solid var(--bold-border);
+          border-radius: var(--bold-radius);
+          background: var(--bold-surface);
+          box-shadow: 4px 4px 0 rgba(21, 21, 21, 0.14);
+          backdrop-filter: none;
+        }
+
+        .persistent-cta__mobile-copy {
+          strong { color: var(--bold-text); }
+          span { color: var(--bold-muted); }
+        }
+
+        .persistent-cta__mobile-action {
+          border: var(--bold-border-width) solid var(--bold-border);
+          border-radius: var(--bold-radius);
+          background: var(--bold-accent);
+          color: #fff;
+          padding: 0.52rem 0.68rem;
+        }
+      }
+    }
+
+    &--lifestyle {
+      .persistent-cta__card {
+        width: 280px;
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        background: rgba(255, 250, 244, 0.92);
+        box-shadow: var(--lifestyle-shadow-lg);
+      }
+
+      .persistent-cta__eyebrow,
+      .persistent-cta__agent-label {
+        color: var(--lifestyle-muted);
+      }
+
+      .persistent-cta__price {
+        font-family: var(--lifestyle-font-heading);
+        color: var(--lifestyle-text);
+        font-weight: 600;
+      }
+
+      .persistent-cta__address,
+      .persistent-cta__agent strong,
+      .persistent-cta__links a {
+        color: var(--lifestyle-text);
+      }
+
+      .persistent-cta__stats,
+      .persistent-cta__agent span {
+        color: var(--lifestyle-muted);
+      }
+
+      .persistent-cta__agent {
+        border-top-color: rgba(104, 90, 72, 0.12);
+      }
+
+      .persistent-cta__primary {
+        border-radius: var(--lifestyle-button-radius);
+        background: var(--lifestyle-accent);
+        box-shadow: 0 14px 28px rgba(111, 133, 119, 0.18);
+
+        &:hover {
+          background: #5e7568;
+          box-shadow: 0 16px 30px rgba(111, 133, 119, 0.22);
+        }
+      }
+
+      // Lifestyle mobile: apply full personality only after scrolling past hero
+      &.persistent-cta--mobile.is-past-hero {
+        .persistent-cta__mobile-bar {
+          padding: 0.64rem 0.76rem;
+          border: 1px solid var(--lifestyle-border);
+          border-radius: var(--lifestyle-radius-sm);
+          background: rgba(255, 250, 244, 0.92);
+          box-shadow: 0 12px 24px rgba(53, 43, 31, 0.08);
+        }
+
+        .persistent-cta__mobile-copy {
+          strong { color: var(--lifestyle-text); }
+          span { color: var(--lifestyle-muted); }
+        }
+
+        .persistent-cta__mobile-action {
+          padding: 0.54rem 0.74rem;
+          border-radius: 999px;
+          background: var(--lifestyle-accent-soft);
+          color: var(--lifestyle-text);
+        }
+      }
+    }
+  }
+</style>

@@ -1,3 +1,5 @@
+import type { SiteTemplateId } from '../templates/site';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PropertyData — the canonical schema for a single-property site
 // All fields marked optional (?) are conditional rendering triggers in the UI
@@ -8,6 +10,7 @@ export interface PropertyMeta {
   site_title: string;        // <title> tag
   site_description: string;  // meta description
   og_image?: string;         // social share image path (relative to /public)
+  template?: SiteTemplateId; // visual site variant selector
 }
 
 export interface PropertyAddress {

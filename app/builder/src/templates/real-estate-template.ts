@@ -11,6 +11,17 @@ function isNonEmptyString(value: Nullable<string>): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function normalizeSiteTemplate(value: Nullable<string>): 'classic' | 'modern' | 'bold' | 'lifestyle' | undefined {
+  if (!isNonEmptyString(value)) {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return normalized === 'classic' || normalized === 'modern' || normalized === 'bold' || normalized === 'lifestyle'
+    ? normalized
+    : undefined;
+}
+
 function assertRequiredString(value: unknown, fieldName: string): string {
   const normalizedValue = typeof value === 'string' ? value : undefined;
   if (!isNonEmptyString(normalizedValue)) {
@@ -205,6 +216,7 @@ function mapPayloadToPropertyData(
         description: descriptionHtml,
       }),
       og_image: firstImage?.publicPath,
+      template: normalizeSiteTemplate(payload.site_template),
     },
     address: {
       street: address,
@@ -291,6 +303,7 @@ export const realEstateTemplateDefinition: TemplateDefinition = {
       'source_url',
       'artifact_folder_path',
       'agent_image_url',
+      'site_template',
     ],
     image_expectations: {
       min_listing_images: 1,

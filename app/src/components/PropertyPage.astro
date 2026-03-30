@@ -1,0 +1,66 @@
+---
+import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
+import { CANONICAL_SECTION_ORDER, type CanonicalSectionId } from '../templates/page-contract';
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import Gallery from './Gallery.astro';
+import PropertySummary from './PropertySummary.astro';
+import About from './About.astro';
+import Features from './Features.astro';
+import Schools from './Schools.astro';
+import Location from './Location.astro';
+import FloorPlans from './FloorPlans.astro';
+import Contact from './Contact.astro';
+import ScheduleShowing from './ScheduleShowing.astro';
+import Footer from './Footer.astro';
+import PersistentCta from './PersistentCta.astro';
+import Lightbox from './Lightbox.astro';
+
+interface Props {
+  property: PropertyData;
+  templateId: SiteTemplateId;
+}
+
+const { property, templateId } = Astro.props;
+
+const sectionComponents: Record<CanonicalSectionId, unknown> = {
+  header: Header,
+  hero: Hero,
+  gallery: Gallery,
+  'property-summary': PropertySummary,
+  about: About,
+  features: Features,
+  schools: Schools,
+  location: Location,
+  'floor-plans': FloorPlans,
+  contact: Contact,
+  'schedule-showing': ScheduleShowing,
+  footer: Footer,
+};
+
+const orderedSections = CANONICAL_SECTION_ORDER.map((sectionId) => ({
+  id: sectionId,
+  component: sectionComponents[sectionId] as any,
+}));
+
+const [headerSection] = orderedSections;
+const mainSections = orderedSections.slice(1, -1);
+const footerSection = orderedSections[orderedSections.length - 1];
+const HeaderSection = headerSection.component;
+const FooterSection = footerSection.component;
+---
+
+<HeaderSection property={property} variant={templateId} />
+
+<PersistentCta property={property} templateId={templateId} />
+
+<main>
+  {mainSections.map(({ id, component: Section }) => {
+    return <Section property={property} variant={templateId} key={id} />;
+  })}
+</main>
+
+<FooterSection property={property} variant={templateId} />
+
+<Lightbox />

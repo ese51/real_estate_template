@@ -1,11 +1,13 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { location, address } = property;
 
 const STATE_NAMES: Record<string, string> = {
@@ -26,14 +28,14 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
 const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address.full)}&output=embed&z=15`;
 ---
 
-<section class="location section" id="location" aria-label="Location">
+<section class:list={['location section', variant === 'modern' && 'location--modern', variant === 'bold' && 'location--bold', variant === 'lifestyle' && 'location--lifestyle']} id="location" aria-label="Location">
   <div class="location__inner">
     <div class="container">
       <div class="location__layout">
 
         <div class="location__text">
           <span class="section-label">Location</span>
-          <h2>{situatedIn}</h2>
+          <h2>{variant === 'lifestyle' ? `Life in ${address.city}` : situatedIn}</h2>
           <div class="divider"></div>
           <p class="location__address">{address.full}</p>
 
@@ -170,6 +172,163 @@ const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address.fu
 
       @media (max-width: $bp-lg) {
         height: 320px;
+      }
+    }
+
+    &--modern {
+      .location__inner {
+        background: transparent;
+        padding: 0;
+      }
+
+      .location__layout {
+        gap: 1.5rem;
+      }
+
+      .location__text,
+      .location__map-panel {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        background: var(--modern-surface-glass);
+        box-shadow: var(--modern-shadow);
+      }
+
+      .location__text {
+        padding: var(--modern-panel-padding);
+      }
+
+      h2 {
+        color: var(--modern-text);
+      }
+
+      .divider {
+        background: rgba(100, 116, 139, 0.28);
+      }
+
+      .location__address,
+      .location__highlight {
+        color: var(--modern-muted);
+      }
+
+      .location__arrow {
+        color: var(--modern-text);
+      }
+
+      .location__map-cta {
+        color: var(--modern-text);
+        border-bottom-color: rgba(15, 23, 42, 0.16);
+
+        &:hover {
+          color: #1e293b;
+          border-color: rgba(15, 23, 42, 0.28);
+        }
+      }
+
+      .location__map-panel {
+        border-radius: var(--modern-radius);
+        border-color: var(--modern-border);
+        overflow: hidden;
+      }
+    }
+
+    &--bold {
+      .location__inner {
+        background: transparent;
+        padding: 0;
+      }
+
+      .location__layout {
+        gap: 1rem;
+      }
+
+      .location__text,
+      .location__map-panel {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow);
+      }
+
+      .location__text {
+        padding: var(--bold-panel-padding);
+      }
+
+      h2 {
+        color: var(--bold-text);
+        text-transform: uppercase;
+      }
+
+      .divider {
+        background: var(--bold-accent);
+      }
+
+      .location__address,
+      .location__highlight {
+        color: var(--bold-text);
+      }
+
+      .location__arrow,
+      .location__map-cta {
+        color: var(--bold-accent);
+      }
+
+      .location__map-cta {
+        border-bottom-color: var(--bold-accent);
+
+        &:hover {
+          color: var(--bold-text);
+          border-color: var(--bold-text);
+        }
+      }
+    }
+
+    &--lifestyle {
+      .location__inner {
+        background: transparent;
+        padding: 0;
+      }
+
+      .location__layout {
+        gap: 1.5rem;
+      }
+
+      .location__text,
+      .location__map-panel {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+      }
+
+      .location__text {
+        padding: var(--lifestyle-panel-padding);
+      }
+
+      h2 {
+        color: var(--lifestyle-text);
+      }
+
+      .divider {
+        background: rgba(111, 133, 119, 0.32);
+      }
+
+      .location__address,
+      .location__highlight {
+        color: var(--lifestyle-muted);
+      }
+
+      .location__arrow {
+        color: var(--lifestyle-accent);
+      }
+
+      .location__map-cta {
+        color: var(--lifestyle-accent);
+        border-bottom-color: rgba(111, 133, 119, 0.24);
+
+        &:hover {
+          color: var(--lifestyle-text);
+          border-color: rgba(104, 90, 72, 0.26);
+        }
       }
     }
   }

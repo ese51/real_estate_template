@@ -1,11 +1,13 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { description, address, stats, price_display } = property;
 
 const quickFacts = [
@@ -19,13 +21,13 @@ const quickFacts = [
 ].filter((fact) => fact.value !== undefined && fact.value !== null && fact.value !== '');
 ---
 
-<section class="about section" id="about" aria-label="About this property">
+<section class:list={['about section', variant === 'modern' && 'about--modern', variant === 'bold' && 'about--bold', variant === 'lifestyle' && 'about--lifestyle']} id="about" aria-label="About this property">
   <div class="container">
     <div class="about__layout">
 
       <div class="about__text">
         <span class="section-label">About this Home</span>
-        <h2>{address.street}</h2>
+        <h2>{variant === 'modern' ? 'Designed for daily living' : variant === 'lifestyle' ? 'A home shaped around how life unfolds' : address.street}</h2>
         <div class="divider"></div>
         <div class="about__description" set:html={description} />
       </div>
@@ -168,6 +170,257 @@ const quickFacts = [
 
       &:hover {
         background: #fff;
+      }
+    }
+
+    &--modern {
+      background: transparent;
+
+      .about__layout {
+        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1.15fr) 360px;
+
+        @media (max-width: $bp-lg) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .about__text,
+      .about__card {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        background: var(--modern-surface-glass);
+        box-shadow: var(--modern-shadow);
+      }
+
+      .about__text {
+        padding: var(--modern-panel-padding);
+      }
+
+      h2 {
+        font-size: clamp(1.9rem, 3vw, 2.8rem);
+      }
+
+      .about__description {
+        max-width: none;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: var(--modern-muted);
+      }
+
+      .about__card {
+        position: sticky;
+        top: 118px;
+        padding: 1.2rem;
+      }
+
+      .about__card-header {
+        padding: 0 0 1rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .about__card-label {
+        color: var(--modern-muted);
+      }
+
+      .about__card-price {
+        color: var(--modern-text);
+        font-family: var(--modern-font-heading);
+        font-size: 1.85rem;
+      }
+
+      .about__dl {
+        padding: 0.5rem 0;
+      }
+
+      .about__dl-row {
+        padding: 0.85rem 0;
+        border-bottom-color: rgba(148, 163, 184, 0.18);
+
+        dt {
+          color: var(--modern-muted);
+        }
+
+        dd {
+          color: var(--modern-text);
+        }
+      }
+
+      .about__card-cta {
+        margin-top: 0.6rem;
+        border-radius: var(--modern-button-radius);
+        background: var(--modern-accent);
+        color: #fff;
+
+        &:hover {
+          background: #1e293b;
+        }
+      }
+    }
+
+    &--bold {
+      background: transparent;
+
+      .about__layout {
+        gap: 1rem;
+        grid-template-columns: minmax(0, 1.2fr) 340px;
+
+        @media (max-width: $bp-lg) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .about__text,
+      .about__card {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow);
+      }
+
+      .about__text {
+        padding: var(--bold-panel-padding);
+      }
+
+      h2 {
+        font-size: clamp(2rem, 3.6vw, 3rem);
+        text-transform: uppercase;
+      }
+
+      .about__description {
+        max-width: none;
+        font-size: 1rem;
+        line-height: 1.78;
+
+        :global(p + p) {
+          margin-top: 1.2rem;
+        }
+      }
+
+      .about__card {
+        position: sticky;
+        top: 110px;
+        padding: 1rem;
+      }
+
+      .about__card-header {
+        padding: 0 0 0.9rem;
+        border-bottom: var(--bold-border-width) solid var(--bold-border);
+      }
+
+      .about__card-label {
+        color: var(--bold-accent);
+      }
+
+      .about__card-price {
+        color: var(--bold-text);
+        font-family: var(--bold-font-heading);
+      }
+
+      .about__dl-row {
+        padding: 0.85rem 0;
+        border-bottom-color: rgba(21, 21, 21, 0.16);
+
+        dt {
+          color: var(--bold-muted);
+        }
+
+        dd {
+          color: var(--bold-text);
+        }
+      }
+
+      .about__card-cta {
+        margin-top: 0.55rem;
+        border-radius: var(--bold-radius);
+        border: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-accent);
+        color: #fff;
+        box-shadow: 4px 4px 0 var(--bold-border);
+
+        &:hover {
+          background: #1e42b8;
+        }
+      }
+    }
+
+    &--lifestyle {
+      background: transparent;
+
+      .about__layout {
+        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1.15fr) 360px;
+
+        @media (max-width: $bp-lg) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .about__text,
+      .about__card {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+      }
+
+      .about__text {
+        padding: var(--lifestyle-panel-padding);
+      }
+
+      h2 {
+        font-size: clamp(2rem, 3.2vw, 3rem);
+      }
+
+      .about__description {
+        max-width: none;
+        font-size: 1.02rem;
+        line-height: 1.86;
+        color: var(--lifestyle-muted);
+      }
+
+      .about__card {
+        top: 118px;
+        padding: 1.2rem;
+      }
+
+      .about__card-header {
+        padding: 0 0 1rem;
+        border-bottom-color: rgba(104, 90, 72, 0.12);
+      }
+
+      .about__card-label {
+        color: var(--lifestyle-muted);
+      }
+
+      .about__card-price {
+        color: var(--lifestyle-text);
+        font-family: var(--lifestyle-font-heading);
+        font-weight: 600;
+      }
+
+      .about__dl-row {
+        padding: 0.88rem 0;
+        border-bottom-color: rgba(104, 90, 72, 0.1);
+
+        dt {
+          color: var(--lifestyle-muted);
+        }
+
+        dd {
+          color: var(--lifestyle-text);
+        }
+      }
+
+      .about__card-cta {
+        margin-top: 0.6rem;
+        border-radius: var(--lifestyle-button-radius);
+        background: var(--lifestyle-accent);
+        color: #fff;
+
+        &:hover {
+          background: #5e7568;
+        }
       }
     }
   }

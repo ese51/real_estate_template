@@ -1,22 +1,24 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { schedule_showing, address, agent } = property;
 ---
 
 {schedule_showing.enabled && (
-  <section class="schedule section section--mid" id="schedule" aria-label="Schedule a showing">
+  <section class:list={['schedule section section--mid', variant === 'modern' && 'schedule--modern', variant === 'bold' && 'schedule--bold', variant === 'lifestyle' && 'schedule--lifestyle']} id="schedule" aria-label="Schedule a showing">
     <div class="container">
       <div class="schedule__layout">
 
         <div class="schedule__intro">
           <span class="section-label">Private Tours</span>
-          <h2>Schedule a Showing</h2>
+          <h2>{variant === 'lifestyle' ? 'Plan a Private Visit' : 'Schedule a Showing'}</h2>
           <div class="divider"></div>
           <p>
             Experience {address.street} in person. Tours are by private appointment only.
@@ -240,6 +242,175 @@ const { schedule_showing, address, agent } = property;
 
       &:active {
         transform: translateY(0);
+      }
+    }
+
+    &--modern {
+      background: transparent;
+
+      .schedule__layout {
+        gap: 1.5rem;
+      }
+
+      .schedule__intro {
+        top: 118px;
+
+        p {
+          color: var(--modern-muted);
+        }
+      }
+
+      .schedule__form-wrap,
+      .schedule__calendly {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        background: var(--modern-surface-glass);
+        box-shadow: var(--modern-shadow);
+      }
+
+      .schedule__form {
+        padding: var(--modern-panel-padding);
+      }
+
+      input,
+      textarea {
+        border-radius: 16px;
+        border-color: rgba(148, 163, 184, 0.22);
+        background: var(--modern-surface-muted);
+
+        &:focus {
+          border-color: rgba(15, 23, 42, 0.18);
+          box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
+        }
+      }
+
+      .schedule__field-label,
+      .schedule__demo-msg {
+        color: var(--modern-muted);
+      }
+
+      .schedule__submit {
+        border-radius: var(--modern-button-radius);
+        background: var(--modern-accent);
+
+        &:hover {
+          background: #1e293b;
+        }
+      }
+    }
+
+    &--bold {
+      background: transparent;
+
+      .schedule__layout {
+        gap: 1rem;
+      }
+
+      .schedule__intro {
+        top: 110px;
+
+        h2 {
+          text-transform: uppercase;
+        }
+
+        p {
+          color: var(--bold-text);
+        }
+      }
+
+      .schedule__form-wrap,
+      .schedule__calendly {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow);
+      }
+
+      .schedule__form {
+        padding: var(--bold-panel-padding);
+      }
+
+      input,
+      textarea {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: #fff;
+
+        &:focus {
+          border-color: var(--bold-accent);
+          box-shadow: 0 0 0 3px rgba(40, 80, 216, 0.14);
+        }
+      }
+
+      .schedule__field-label,
+      .schedule__demo-msg {
+        color: var(--bold-text);
+      }
+
+      .schedule__submit {
+        border-radius: var(--bold-radius);
+        border: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-accent);
+        box-shadow: 4px 4px 0 var(--bold-border);
+
+        &:hover {
+          background: #1e42b8;
+          transform: translate(-1px, -1px);
+        }
+      }
+    }
+
+    &--lifestyle {
+      background: transparent;
+
+      .schedule__layout {
+        gap: 1.5rem;
+      }
+
+      .schedule__intro {
+        top: 118px;
+
+        p {
+          color: var(--lifestyle-muted);
+        }
+      }
+
+      .schedule__form-wrap,
+      .schedule__calendly {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+      }
+
+      .schedule__form {
+        padding: var(--lifestyle-panel-padding);
+      }
+
+      input,
+      textarea {
+        border-radius: var(--lifestyle-radius-sm);
+        border-color: rgba(104, 90, 72, 0.16);
+        background: rgba(255, 255, 255, 0.8);
+
+        &:focus {
+          border-color: rgba(111, 133, 119, 0.3);
+          box-shadow: 0 0 0 4px rgba(111, 133, 119, 0.08);
+        }
+      }
+
+      .schedule__field-label,
+      .schedule__demo-msg {
+        color: var(--lifestyle-muted);
+      }
+
+      .schedule__submit {
+        border-radius: var(--lifestyle-button-radius);
+        background: var(--lifestyle-accent);
+
+        &:hover {
+          background: #5e7568;
+        }
       }
     }
   }

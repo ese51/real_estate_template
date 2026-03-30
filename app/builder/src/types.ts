@@ -27,6 +27,7 @@ export interface HiveMindListingPayload {
   artifact_folder_path?: string | null;
   slug?: string | null;
   agent_image_url?: string | null;
+  site_template?: string | null;
 }
 
 export interface BuildSiteResult {

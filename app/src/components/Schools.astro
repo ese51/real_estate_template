@@ -1,19 +1,21 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { schools } = property;
 ---
 
 {schools && schools.length > 0 && (
-  <section class="schools section section--mid" id="schools" aria-label="Nearby schools">
+  <section class:list={['schools section section--mid', variant === 'modern' && 'schools--modern', variant === 'bold' && 'schools--bold', variant === 'lifestyle' && 'schools--lifestyle']} id="schools" aria-label="Nearby schools">
     <div class="container">
       <span class="section-label">Education</span>
-      <h2>Nearby Schools</h2>
+      <h2>{variant === 'modern' ? 'Schools near the property' : variant === 'lifestyle' ? 'Schools that support daily life' : 'Nearby Schools'}</h2>
       <div class="divider"></div>
 
       <div class="schools__grid">
@@ -134,6 +136,112 @@ const { schools } = property;
       font-size: 0.8rem;
       color: $color-accent;
       font-weight: 500;
+    }
+
+    &--modern {
+      background: transparent;
+
+      .schools__card {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        padding: var(--modern-panel-padding);
+        box-shadow: var(--modern-shadow);
+      }
+
+      .schools__level {
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        color: var(--modern-text);
+      }
+
+      .schools__rating-num {
+        font-family: var(--modern-font-heading);
+        color: var(--modern-text);
+      }
+
+      .schools__rating-den,
+      .schools__district {
+        color: var(--modern-muted);
+      }
+
+      .schools__name {
+        font-family: var(--modern-font-heading);
+        color: var(--modern-text);
+      }
+
+      .schools__distance {
+        color: #334155;
+      }
+    }
+
+    &--bold {
+      background: transparent;
+
+      .schools__card {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        padding: var(--bold-panel-padding);
+        box-shadow: var(--bold-shadow);
+      }
+
+      .schools__level {
+        border-radius: var(--bold-radius);
+        background: var(--bold-text);
+        color: #fff;
+      }
+
+      .schools__rating-num,
+      .schools__name {
+        font-family: var(--bold-font-heading);
+        color: var(--bold-text);
+      }
+
+      .schools__rating-den,
+      .schools__district {
+        color: var(--bold-muted);
+      }
+
+      .schools__distance {
+        color: var(--bold-accent);
+      }
+    }
+
+    &--lifestyle {
+      background: transparent;
+
+      .schools__card {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        padding: calc(var(--lifestyle-panel-padding) - 0.1rem);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+      }
+
+      .schools__level {
+        border-radius: 999px;
+        background: var(--lifestyle-accent-soft);
+        color: var(--lifestyle-accent);
+      }
+
+      .schools__rating-num {
+        font-family: var(--lifestyle-font-heading);
+        color: var(--lifestyle-text);
+      }
+
+      .schools__rating-den,
+      .schools__district {
+        color: var(--lifestyle-muted);
+      }
+
+      .schools__name {
+        font-family: var(--lifestyle-font-heading);
+        color: var(--lifestyle-text);
+        font-weight: 600;
+      }
+
+      .schools__distance {
+        color: var(--lifestyle-accent);
+      }
     }
   }
 </style>

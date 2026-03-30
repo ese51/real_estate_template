@@ -1,12 +1,15 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 import '../styles/global.scss';
 
 interface Props {
   property: PropertyData;
+  templateId: SiteTemplateId;
+  hasPersistentCta?: boolean;
 }
 
-const { property } = Astro.props;
+const { property, templateId, hasPersistentCta = false } = Astro.props;
 const { meta, address } = property;
 ---
 
@@ -33,7 +36,15 @@ const { meta, address } = property;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-  <body>
+  <body
+    data-template={templateId}
+    class:list={[
+      templateId === 'modern' && 'template-modern',
+      templateId === 'bold' && 'template-bold',
+      templateId === 'lifestyle' && 'template-lifestyle',
+      hasPersistentCta && 'has-persistent-cta',
+    ]}
+  >
     <slot />
   </body>
 </html>

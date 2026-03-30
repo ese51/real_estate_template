@@ -13,19 +13,8 @@
 
 import type { PropertyData } from '../types/property';
 import PropertyLayout from '../layouts/PropertyLayout.astro';
-import Header from '../components/Header.astro';
-import Hero from '../components/Hero.astro';
-import Gallery from '../components/Gallery.astro';
-import PropertySummary from '../components/PropertySummary.astro';
-import About from '../components/About.astro';
-import Features from '../components/Features.astro';
-import Schools from '../components/Schools.astro';
-import Location from '../components/Location.astro';
-import FloorPlans from '../components/FloorPlans.astro';
-import Contact from '../components/Contact.astro';
-import ScheduleShowing from '../components/ScheduleShowing.astro';
-import Footer from '../components/Footer.astro';
-import Lightbox from '../components/Lightbox.astro';
+import PropertyPage from '../components/PropertyPage.astro';
+import { resolveSiteTemplateId } from '../templates/site';
 
 export async function getStaticPaths() {
   const modules = import.meta.glob<{ default: PropertyData }>(
@@ -61,22 +50,11 @@ interface Props {
 }
 
 const { property } = Astro.props;
+const templateId = resolveSiteTemplateId(property);
+const hasPersistentCta = (templateId === 'modern' || templateId === 'bold' || templateId === 'lifestyle')
+  && (property.schedule_showing.enabled || Boolean(property.agent.phone) || Boolean(property.agent.email));
 ---
 
-<PropertyLayout property={property}>
-  <Header property={property} />
-  <main>
-    <Hero property={property} />
-    <PropertySummary property={property} />
-    <About property={property} />
-    <Location property={property} />
-    <Gallery property={property} />
-    <Features property={property} />
-    <Schools property={property} />
-    <FloorPlans property={property} />
-    <Contact property={property} />
-    <ScheduleShowing property={property} />
-  </main>
-  <Footer property={property} />
-  <Lightbox />
+<PropertyLayout property={property} templateId={templateId} hasPersistentCta={hasPersistentCta}>
+  <PropertyPage property={property} templateId={templateId} />
 </PropertyLayout>

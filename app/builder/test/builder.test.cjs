@@ -169,6 +169,32 @@ test('builder writes a new property JSON and build includes the slug route', asy
   }
 });
 
+test('builder writes the selected site template into property metadata when provided', async () => {
+  const payload = makePayload({
+    address: '4412 Builder Ridge Rd',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+    site_template: 'lifestyle',
+  });
+  const slug = '4412builderridge';
+  const artifactRoot = await makeArtifactRoot(`${slug}-template`);
+  const artifactFolderPath = path.join(artifactRoot, 'site');
+  payload.artifact_folder_path = artifactFolderPath;
+
+  try {
+    const result = await build_site_from_listing(payload, null, false);
+    const jsonPath = path.join(appDir, 'src/data/properties', `${slug}.json`);
+    const writtenJson = JSON.parse(await fs.readFile(jsonPath, 'utf8'));
+
+    assert.equal(result.slug, slug);
+    assert.equal(writtenJson.meta.template, 'lifestyle');
+  } finally {
+    await cleanupSlug(slug, artifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
+  }
+});
+
 test('builder rejects Windows artifact paths on non-Windows hosts before creating repo folders', async () => {
   if (process.platform === 'win32') {
     return;
