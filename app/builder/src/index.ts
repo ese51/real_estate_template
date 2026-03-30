@@ -660,13 +660,25 @@ function gitPushListing(options: {
     `[publisher] Starting git publish: ${JSON.stringify({ repoRoot, branch, slug, propertyJsonPath, listingImagesDir })}\n`
   );
 
-  // Stage property JSON and listing images
+  // Contract check 3: stage property JSON and listing images.
   const addResult = runGitCommand(['add', propertyJsonPath, listingImagesDir], repoRoot);
   if (addResult.status !== 0) {
     throw new Error(
       `[publisher] git add failed (exit ${addResult.status}). stderr: ${addResult.stderr}`
     );
   }
+
+  // Verify the property JSON is now in the git index (staged or already committed).
+  // git ls-files --error-unmatch exits non-zero if the file is unknown to git,
+  // which would mean it is gitignored or the path resolved incorrectly.
+  const lsResult = runGitCommand(['ls-files', '--error-unmatch', propertyJsonPath], repoRoot);
+  if (lsResult.status !== 0) {
+    throw new Error(
+      `[publisher] Property JSON is not tracked in the git index after git add. ` +
+        `File may be gitignored or the path is wrong. path: ${propertyJsonPath}`
+    );
+  }
+  process.stderr.write(`[publisher] Property JSON confirmed in git index: ${propertyJsonPath}\n`);
 
   // Commit — tolerate "nothing to commit" so force-rebuilds stay safe
   const commitMessage = `Add listing: ${slug}`;
@@ -686,9 +698,15 @@ function gitPushListing(options: {
   const revResult = runGitCommand(['rev-parse', 'HEAD'], repoRoot);
   const commitHash = revResult.stdout || 'unknown';
 
-  process.stderr.write(
-    `[publisher] Committed: ${JSON.stringify({ commitHash, commitMessage, nothingToCommit })}\n`
-  );
+  if (nothingToCommit) {
+    process.stderr.write(
+      `[publisher] Nothing new to commit (property JSON already in repo HEAD): ${JSON.stringify({ commitHash, slug })}\n`
+    );
+  } else {
+    process.stderr.write(
+      `[publisher] Committed: ${JSON.stringify({ commitHash, commitMessage })}\n`
+    );
+  }
 
   // Push — fail loudly if this does not succeed
   const pushResult = runGitCommand(['push', 'origin', branch], repoRoot);
@@ -791,6 +809,14 @@ export async function build_site_from_listing(
   await fs.writeFile(propertyJsonPath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
   writtenFiles.push(propertyJsonPath);
 
+  // Contract check 1: property JSON must exist on disk before the Astro build begins.
+  if (!await pathExists(propertyJsonPath)) {
+    throw new Error(
+      `Property JSON write failed: file not found at expected path after write: ${propertyJsonPath}`
+    );
+  }
+  process.stderr.write(`[builder] Property JSON verified: ${propertyJsonPath}\n`);
+
   await runAppBuild(paths.app_dir, {
     slug,
     propertyJsonPath,
@@ -803,11 +829,13 @@ export async function build_site_from_listing(
     'index.html'
   );
 
+  // Contract check 2: Astro must have emitted the slug's index.html.
   if (!await pathExists(builtRoutePath)) {
     throw new Error(
       `Post-build route missing: Astro build completed but expected route was not generated: ${builtRoutePath}`
     );
   }
+  process.stderr.write(`[builder] Built route verified: ${builtRoutePath}\n`);
 
   if (resolvedArtifactFolderPath) {
     const artifactFiles = await stageArtifact(
