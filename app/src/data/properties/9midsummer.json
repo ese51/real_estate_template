@@ -1,0 +1,339 @@
+{
+  "meta": {
+    "slug": "9midsummer",
+    "site_title": "9 Midsummer Ct — Gaithersburg, MD 20878",
+    "site_description": "9 Midsummer Ct — Gaithersburg, MD 20878. 4 bedrooms, 3.5 baths, 3,464 sq ft. Listed at $1,099,900. Spectacular renovation, fabulous floorplan, and possibly the best location in Washingtonian Woods backing to parkland, pond, and walking paths! Hardwoods flow from the entry foyer and throughout the ma",
+    "og_image": "/images/9midsummer/listing-01.webp"
+  },
+  "address": {
+    "street": "9 Midsummer Ct",
+    "city": "Gaithersburg",
+    "state": "MD",
+    "zip": "20878",
+    "full": "9 Midsummer Ct, Gaithersburg, MD 20878"
+  },
+  "price": 1099900,
+  "price_display": "$1,099,900",
+  "status": "For Sale",
+  "tagline": "4-bedroom home in Gaithersburg, MD.",
+  "description": "<p>Spectacular renovation, fabulous floorplan, and possibly the best location in Washingtonian Woods backing to parkland, pond, and walking paths! Hardwoods flow from the entry foyer and throughout the main level. The large living room showcases crown molding, recessed lighting, a wood-burning masonry fireplace, and double French doors that open to the expansive tiered deck, while the spacious dining room features beautiful natural views through a large picture window and includes custom built-ins and decorator lighting. The remodeled kitchen is a standout, renovated to include granite countertops, and expansive granite-topped island, custom cabinetry, stainless steel appliances, recessed lighting, a double-door pantry, and a custom coffee station. The adjacent family room is brightened by skylights recessed lighting, and large windows, and features a double-sided masonry fireplace plus access to the attached garage and driveway. The private main-level office with double-door entry and built-ins provides an ideal workspace. The beautifully renovated powder room features decorator lighting, subway tile, designer tile flooring, and custom shelving. Hardwood flooring continues through the upper level hallway. The spacious primary suite includes a versatile sitting room/dressing area and a luxury bedroom retreat with a vaulted ceiling, a generous walk-in closet, and three sets of double-door closets. The fully renovated primary bath features marble and quartz finishes, custom cabinetry, a glass-enclosed shower a compartmented water closet, linen closet, and decorator tile, fixtures, and lighting. Three additional bedrooms are spacious and bright while the beautifully renovated second full bath boasts a solid surface vanity, custom cabinetry, wide plank LVP flooring, and a tub/shower with custom tile surround. The upper level also includes a well-appointed laundry room with a laundry sink, folding counter, hanging rod, and extra cabinetry. The finished lower level offers outstanding additional living space including a large recreation room with recessed lighting and a wood-burning fireplace, a custom-built bar, a versatile game room area, a big bonus room, and a beautifully updated full bath. This level also includes plenty of space for storage and direct access to the patio and backyard. Outside of this phenomenal home offers more lovely spaces in which to relax, entertain, and enjoy the natural views, including the tiered Trex deck, the patio, and the front porch. Additional highlights include a five-year-old roof, solar panels, an electric fence, and major system updates. Set on a picturesque cul-de-sac close to all this sought-after neighborhood has to offer, this home has it all!</p>",
+  "stats": {
+    "beds": 4,
+    "baths": 3.5,
+    "sqft": 3464
+  },
+  "gallery": {
+    "hero_image": "/images/9midsummer/listing-01.webp",
+    "images": [
+      {
+        "url": "/images/9midsummer/listing-01.webp",
+        "alt": "9 Midsummer Ct photo 1",
+        "caption": "Primary listing image"
+      },
+      {
+        "url": "/images/9midsummer/listing-02.webp",
+        "alt": "9 Midsummer Ct photo 2"
+      },
+      {
+        "url": "/images/9midsummer/listing-03.webp",
+        "alt": "9 Midsummer Ct photo 3"
+      },
+      {
+        "url": "/images/9midsummer/listing-04.webp",
+        "alt": "9 Midsummer Ct photo 4"
+      },
+      {
+        "url": "/images/9midsummer/listing-05.webp",
+        "alt": "9 Midsummer Ct photo 5"
+      },
+      {
+        "url": "/images/9midsummer/listing-06.webp",
+        "alt": "9 Midsummer Ct photo 6"
+      },
+      {
+        "url": "/images/9midsummer/listing-07.webp",
+        "alt": "9 Midsummer Ct photo 7"
+      },
+      {
+        "url": "/images/9midsummer/listing-08.webp",
+        "alt": "9 Midsummer Ct photo 8"
+      },
+      {
+        "url": "/images/9midsummer/listing-09.webp",
+        "alt": "9 Midsummer Ct photo 9"
+      },
+      {
+        "url": "/images/9midsummer/listing-10.webp",
+        "alt": "9 Midsummer Ct photo 10"
+      },
+      {
+        "url": "/images/9midsummer/listing-11.webp",
+        "alt": "9 Midsummer Ct photo 11"
+      },
+      {
+        "url": "/images/9midsummer/listing-12.webp",
+        "alt": "9 Midsummer Ct photo 12"
+      },
+      {
+        "url": "/images/9midsummer/listing-13.webp",
+        "alt": "9 Midsummer Ct photo 13"
+      },
+      {
+        "url": "/images/9midsummer/listing-14.webp",
+        "alt": "9 Midsummer Ct photo 14"
+      },
+      {
+        "url": "/images/9midsummer/listing-15.webp",
+        "alt": "9 Midsummer Ct photo 15"
+      },
+      {
+        "url": "/images/9midsummer/listing-16.webp",
+        "alt": "9 Midsummer Ct photo 16"
+      },
+      {
+        "url": "/images/9midsummer/listing-17.webp",
+        "alt": "9 Midsummer Ct photo 17"
+      },
+      {
+        "url": "/images/9midsummer/listing-18.webp",
+        "alt": "9 Midsummer Ct photo 18"
+      },
+      {
+        "url": "/images/9midsummer/listing-19.webp",
+        "alt": "9 Midsummer Ct photo 19"
+      },
+      {
+        "url": "/images/9midsummer/listing-20.webp",
+        "alt": "9 Midsummer Ct photo 20"
+      },
+      {
+        "url": "/images/9midsummer/listing-21.webp",
+        "alt": "9 Midsummer Ct photo 21"
+      },
+      {
+        "url": "/images/9midsummer/listing-22.webp",
+        "alt": "9 Midsummer Ct photo 22"
+      },
+      {
+        "url": "/images/9midsummer/listing-23.webp",
+        "alt": "9 Midsummer Ct photo 23"
+      },
+      {
+        "url": "/images/9midsummer/listing-24.webp",
+        "alt": "9 Midsummer Ct photo 24"
+      },
+      {
+        "url": "/images/9midsummer/listing-25.webp",
+        "alt": "9 Midsummer Ct photo 25"
+      },
+      {
+        "url": "/images/9midsummer/listing-26.webp",
+        "alt": "9 Midsummer Ct photo 26"
+      },
+      {
+        "url": "/images/9midsummer/listing-27.webp",
+        "alt": "9 Midsummer Ct photo 27"
+      },
+      {
+        "url": "/images/9midsummer/listing-28.webp",
+        "alt": "9 Midsummer Ct photo 28"
+      },
+      {
+        "url": "/images/9midsummer/listing-29.webp",
+        "alt": "9 Midsummer Ct photo 29"
+      },
+      {
+        "url": "/images/9midsummer/listing-30.webp",
+        "alt": "9 Midsummer Ct photo 30"
+      },
+      {
+        "url": "/images/9midsummer/listing-31.webp",
+        "alt": "9 Midsummer Ct photo 31"
+      },
+      {
+        "url": "/images/9midsummer/listing-32.webp",
+        "alt": "9 Midsummer Ct photo 32"
+      },
+      {
+        "url": "/images/9midsummer/listing-33.webp",
+        "alt": "9 Midsummer Ct photo 33"
+      },
+      {
+        "url": "/images/9midsummer/listing-34.webp",
+        "alt": "9 Midsummer Ct photo 34"
+      },
+      {
+        "url": "/images/9midsummer/listing-35.webp",
+        "alt": "9 Midsummer Ct photo 35"
+      },
+      {
+        "url": "/images/9midsummer/listing-36.webp",
+        "alt": "9 Midsummer Ct photo 36"
+      },
+      {
+        "url": "/images/9midsummer/listing-37.webp",
+        "alt": "9 Midsummer Ct photo 37"
+      },
+      {
+        "url": "/images/9midsummer/listing-38.webp",
+        "alt": "9 Midsummer Ct photo 38"
+      },
+      {
+        "url": "/images/9midsummer/listing-39.webp",
+        "alt": "9 Midsummer Ct photo 39"
+      },
+      {
+        "url": "/images/9midsummer/listing-40.webp",
+        "alt": "9 Midsummer Ct photo 40"
+      },
+      {
+        "url": "/images/9midsummer/listing-41.webp",
+        "alt": "9 Midsummer Ct photo 41"
+      },
+      {
+        "url": "/images/9midsummer/listing-42.webp",
+        "alt": "9 Midsummer Ct photo 42"
+      },
+      {
+        "url": "/images/9midsummer/listing-43.webp",
+        "alt": "9 Midsummer Ct photo 43"
+      },
+      {
+        "url": "/images/9midsummer/listing-44.webp",
+        "alt": "9 Midsummer Ct photo 44"
+      },
+      {
+        "url": "/images/9midsummer/listing-45.webp",
+        "alt": "9 Midsummer Ct photo 45"
+      },
+      {
+        "url": "/images/9midsummer/listing-46.webp",
+        "alt": "9 Midsummer Ct photo 46"
+      },
+      {
+        "url": "/images/9midsummer/listing-47.webp",
+        "alt": "9 Midsummer Ct photo 47"
+      },
+      {
+        "url": "/images/9midsummer/listing-48.webp",
+        "alt": "9 Midsummer Ct photo 48"
+      },
+      {
+        "url": "/images/9midsummer/listing-49.webp",
+        "alt": "9 Midsummer Ct photo 49"
+      },
+      {
+        "url": "/images/9midsummer/listing-50.webp",
+        "alt": "9 Midsummer Ct photo 50"
+      },
+      {
+        "url": "/images/9midsummer/listing-51.webp",
+        "alt": "9 Midsummer Ct photo 51"
+      },
+      {
+        "url": "/images/9midsummer/listing-52.webp",
+        "alt": "9 Midsummer Ct photo 52"
+      },
+      {
+        "url": "/images/9midsummer/listing-53.webp",
+        "alt": "9 Midsummer Ct photo 53"
+      },
+      {
+        "url": "/images/9midsummer/listing-54.webp",
+        "alt": "9 Midsummer Ct photo 54"
+      },
+      {
+        "url": "/images/9midsummer/listing-55.webp",
+        "alt": "9 Midsummer Ct photo 55"
+      },
+      {
+        "url": "/images/9midsummer/listing-56.webp",
+        "alt": "9 Midsummer Ct photo 56"
+      },
+      {
+        "url": "/images/9midsummer/listing-57.webp",
+        "alt": "9 Midsummer Ct photo 57"
+      },
+      {
+        "url": "/images/9midsummer/listing-58.webp",
+        "alt": "9 Midsummer Ct photo 58"
+      },
+      {
+        "url": "/images/9midsummer/listing-59.webp",
+        "alt": "9 Midsummer Ct photo 59"
+      },
+      {
+        "url": "/images/9midsummer/listing-60.webp",
+        "alt": "9 Midsummer Ct photo 60"
+      },
+      {
+        "url": "/images/9midsummer/listing-61.webp",
+        "alt": "9 Midsummer Ct photo 61"
+      },
+      {
+        "url": "/images/9midsummer/listing-62.webp",
+        "alt": "9 Midsummer Ct photo 62"
+      },
+      {
+        "url": "/images/9midsummer/listing-63.webp",
+        "alt": "9 Midsummer Ct photo 63"
+      },
+      {
+        "url": "/images/9midsummer/listing-64.webp",
+        "alt": "9 Midsummer Ct photo 64"
+      },
+      {
+        "url": "/images/9midsummer/listing-65.webp",
+        "alt": "9 Midsummer Ct photo 65"
+      },
+      {
+        "url": "/images/9midsummer/listing-66.webp",
+        "alt": "9 Midsummer Ct photo 66"
+      },
+      {
+        "url": "/images/9midsummer/listing-67.webp",
+        "alt": "9 Midsummer Ct photo 67"
+      },
+      {
+        "url": "/images/9midsummer/listing-68.webp",
+        "alt": "9 Midsummer Ct photo 68"
+      },
+      {
+        "url": "/images/9midsummer/listing-69.webp",
+        "alt": "9 Midsummer Ct photo 69"
+      }
+    ]
+  },
+  "features": [
+    {
+      "category": "Listing Overview",
+      "items": [
+        "4 bedrooms",
+        "3.5 bathrooms",
+        "3,464 sq ft",
+        "Listed at $1,099,900",
+        "Source listing available at https://www.realtor.com/realestateandhomes-detail/9-Midsummer-Ct_Gaithersburg_MD_20878_M62173-18921"
+      ]
+    }
+  ],
+  "schools": [],
+  "location": {
+    "lat": 0,
+    "lng": 0,
+    "neighborhood": "Gaithersburg",
+    "highlights": [
+      "Source listing: https://www.realtor.com/realestateandhomes-detail/9-Midsummer-Ct_Gaithersburg_MD_20878_M62173-18921"
+    ]
+  },
+  "floor_plans": [],
+  "agent": {
+    "name": "Meredith Fogle",
+    "title": "Listing Agent",
+    "phone": "",
+    "email": "",
+    "brokerage": "The List Realty"
+  },
+  "schedule_showing": {
+    "enabled": false
+  }
+}
