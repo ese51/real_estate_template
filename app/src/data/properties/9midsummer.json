@@ -311,8 +311,7 @@
         "4 bedrooms",
         "3.5 bathrooms",
         "3,464 sq ft",
-        "Listed at $1,099,900",
-        "Source listing available at https://www.realtor.com/realestateandhomes-detail/9-Midsummer-Ct_Gaithersburg_MD_20878_M62173-18921"
+        "Listed at $1,099,900"
       ]
     }
   ],
@@ -322,7 +321,7 @@
     "lng": 0,
     "neighborhood": "Gaithersburg",
     "highlights": [
-      "Source listing: https://www.realtor.com/realestateandhomes-detail/9-Midsummer-Ct_Gaithersburg_MD_20878_M62173-18921"
+      "Gaithersburg, MD 20878"
     ]
   },
   "floor_plans": [],
@@ -331,6 +330,7 @@
     "title": "Listing Agent",
     "phone": "",
     "email": "",
+    "photo": "/images/agents/Meredith-Fogle.webp",
     "brokerage": "The List Realty"
   },
   "schedule_showing": {
