@@ -24,9 +24,11 @@ const carouselImages = CAROUSEL_PICKS
 
 const slides = carouselImages.length > 0
   ? carouselImages
-  : gallery.hero_image
-    ? [{ url: gallery.hero_image, alt: address.street }]
-    : [];
+  : gallery.images.length > 0
+    ? gallery.images.slice(0, 5)
+    : gallery.hero_image
+      ? [{ url: gallery.hero_image, alt: address.street }]
+      : [];
 
 const heroStats = [
   { short: 'Beds', value: String(stats.beds) },
