@@ -1,16 +1,30 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
-const { address, price_display, status, agent, schedule_showing } = property;
+const { property, variant = 'classic' } = Astro.props;
+const { address, price_display, status, agent, schedule_showing, schools, floor_plans } = property;
 const year = new Date().getFullYear();
+const brokerage = agent.brokerage?.trim();
+const legalMessage = brokerage
+  ? `© ${year} Hive Nova. This is a demo website and is not affiliated with ${brokerage}.`
+  : `© ${year} Hive Nova. This is a demo website created for marketing purposes.`;
+const footerLinks = [
+  { href: '#about', label: 'About the Home' },
+  { href: '#features', label: 'Features & Finishes' },
+  ...(floor_plans && floor_plans.length > 0 ? [{ href: '#floor-plans', label: 'Floor Plans' }] : []),
+  ...(schools && schools.length > 0 ? [{ href: '#schools', label: 'Nearby Schools' }] : []),
+  { href: '#location', label: 'Location' },
+  { href: '#contact', label: 'Contact' },
+];
 ---
 
-<footer class="footer" aria-label="Site footer">
+<footer class:list={['footer', variant === 'modern' && 'footer--modern', variant === 'bold' && 'footer--bold', variant === 'lifestyle' && 'footer--lifestyle']} aria-label="Site footer">
 
   <div class="footer__main">
     <div class="container">
@@ -31,12 +45,9 @@ const year = new Date().getFullYear();
         <nav class="footer__col footer__col--nav" aria-label="Footer links">
           <span class="footer__col-label">On This Page</span>
           <ul>
-            <li><a href="#about">About the Home</a></li>
-            <li><a href="#features">Features & Finishes</a></li>
-            <li><a href="#floor-plans">Floor Plans</a></li>
-            <li><a href="#schools">Nearby Schools</a></li>
-            <li><a href="#location">Location</a></li>
-            <li><a href="#contact">Contact</a></li>
+            {footerLinks.map((link) => (
+              <li><a href={link.href}>{link.label}</a></li>
+            ))}
           </ul>
         </nav>
 
@@ -58,12 +69,7 @@ const year = new Date().getFullYear();
 
   <div class="footer__legal">
     <div class="container">
-      <p class="footer__disclaimer">
-        All information deemed reliable but not guaranteed. Property data, measurements,
-        and descriptions are approximate and subject to change without notice.
-        This is not an offer to sell. Equal Housing Opportunity.
-      </p>
-      <p class="footer__copy">&copy; {year} {agent.brokerage || agent.name}</p>
+      <p class="footer__legal-copy">{legalMessage}</p>
     </div>
   </div>
 
@@ -236,17 +242,219 @@ const year = new Date().getFullYear();
       }
     }
 
-    &__disclaimer {
+    &__legal-copy {
       font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.25);
+      color: rgba(255, 255, 255, 0.34);
       line-height: 1.7;
       max-width: 680px;
     }
 
-    &__copy {
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.2);
-      white-space: nowrap;
+    &--modern {
+      .footer__main {
+        background: transparent;
+        padding-top: 1rem;
+      }
+
+      .footer__grid {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        background: var(--modern-surface-glass);
+        box-shadow: var(--modern-shadow);
+        padding: var(--modern-panel-padding);
+      }
+
+      .footer__col-label,
+      .footer__city,
+      .footer__license,
+      .footer__copy,
+      .footer__disclaimer {
+        color: var(--modern-muted);
+      }
+
+      .footer__status-pill {
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        color: var(--modern-text);
+      }
+
+      .footer__address,
+      .footer__agent-name,
+      .footer__price {
+        font-family: var(--modern-font-heading);
+        color: var(--modern-text);
+      }
+
+      .footer__cta {
+        border-radius: var(--modern-button-radius);
+        background: var(--modern-accent);
+        color: #fff;
+
+        &:hover {
+          background: #1e293b;
+        }
+      }
+
+      .footer__col--nav a,
+      .footer__agent-contacts a,
+      .footer__agent-brokerage {
+        color: #334155;
+
+        &:hover {
+          color: var(--modern-text);
+        }
+      }
+
+      .footer__legal {
+        background: transparent;
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+      }
+
+      .footer__legal-copy {
+        color: var(--modern-muted);
+      }
+    }
+
+    &--bold {
+      .footer__main {
+        background: transparent;
+        padding-top: 1rem;
+      }
+
+      .footer__grid {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow-lg);
+        padding: var(--bold-panel-padding);
+      }
+
+      .footer__col-label,
+      .footer__city,
+      .footer__license,
+      .footer__copy,
+      .footer__disclaimer {
+        color: var(--bold-muted);
+      }
+
+      .footer__status-pill {
+        border-radius: var(--bold-radius);
+        background: var(--bold-accent);
+        color: #fff;
+      }
+
+      .footer__address,
+      .footer__agent-name,
+      .footer__price {
+        font-family: var(--bold-font-heading);
+        color: var(--bold-text);
+      }
+
+      .footer__cta {
+        border-radius: var(--bold-radius);
+        border: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-accent);
+        color: #fff;
+        box-shadow: 4px 4px 0 var(--bold-border);
+
+        &:hover {
+          background: #1e42b8;
+          transform: translate(-1px, -1px);
+        }
+      }
+
+      .footer__col--nav a,
+      .footer__agent-contacts a,
+      .footer__agent-brokerage {
+        color: var(--bold-text);
+
+        &:hover {
+          color: var(--bold-accent);
+        }
+      }
+
+      .footer__legal {
+        background: transparent;
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+      }
+
+      .footer__legal-copy {
+        color: rgba(15, 23, 42, 0.62);
+      }
+    }
+
+    &--lifestyle {
+      .footer__main {
+        background: transparent;
+        padding-top: 0;
+      }
+
+      .footer__grid {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: calc(var(--lifestyle-radius) + 2px);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow-lg);
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+      }
+
+      .footer__col-label,
+      .footer__city,
+      .footer__license,
+      .footer__copy,
+      .footer__disclaimer {
+        color: var(--lifestyle-muted);
+      }
+
+      .footer__status-pill {
+        border-radius: 999px;
+        background: var(--lifestyle-accent);
+        color: #fff;
+      }
+
+      .footer__address,
+      .footer__agent-name,
+      .footer__price {
+        font-family: var(--lifestyle-font-heading);
+        color: var(--lifestyle-text);
+        font-weight: 600;
+      }
+
+      .footer__cta {
+        border-radius: var(--lifestyle-button-radius);
+        background: var(--lifestyle-accent);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(111, 133, 119, 0.16);
+
+        &:hover {
+          background: #5e7568;
+        }
+      }
+
+      .footer__col--nav a,
+      .footer__agent-contacts a,
+      .footer__agent-brokerage {
+        color: var(--lifestyle-muted);
+
+        &:hover {
+          color: var(--lifestyle-text);
+        }
+      }
+
+      .footer__price,
+      .footer__agent-brokerage {
+        color: var(--lifestyle-accent);
+      }
+
+      .footer__legal {
+        background: transparent;
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+      }
+
+      .footer__legal-copy {
+        color: rgba(80, 73, 65, 0.7);
+      }
     }
   }
 </style>

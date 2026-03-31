@@ -1,20 +1,22 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { features } = property;
 ---
 
-<section class="features section" id="features" aria-label="Property features">
+<section class:list={['features section', variant === 'modern' && 'features--modern', variant === 'bold' && 'features--bold', variant === 'lifestyle' && 'features--lifestyle']} id="features" aria-label="Property features">
   <div class="container">
     <div class="features__header">
       <div>
         <span class="section-label">Features &amp; Finishes</span>
-        <h2>Inside the Home</h2>
+        <h2>{variant === 'modern' ? 'Scannable, room-by-room highlights' : variant === 'lifestyle' ? 'Comfort, function, and thoughtful details' : 'Inside the Home'}</h2>
       </div>
     </div>
 
@@ -108,6 +110,124 @@ const { features } = property;
         background: $color-accent;
         flex-shrink: 0;
         margin-top: 0.42em;
+      }
+    }
+
+    &--modern {
+      background: transparent;
+
+      .features__grid {
+        gap: 1rem;
+        background: transparent;
+        border: none;
+      }
+
+      .features__category {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        background: var(--modern-surface-glass);
+        box-shadow: var(--modern-shadow);
+        padding: var(--modern-panel-padding);
+      }
+
+      .features__cat-title {
+        font-family: var(--modern-font-body);
+        font-size: 0.72rem;
+        color: var(--modern-muted);
+        border-bottom-color: rgba(148, 163, 184, 0.2);
+      }
+
+      .features__item {
+        padding: 0.7rem 0;
+        color: var(--modern-text);
+        border-bottom-color: rgba(148, 163, 184, 0.14);
+
+        &::before {
+          width: 6px;
+          height: 6px;
+          background: rgba(15, 23, 42, 0.2);
+          margin-top: 0.5em;
+        }
+      }
+    }
+
+    &--bold {
+      background: transparent;
+
+      .features__header h2 {
+        font-size: clamp(2.1rem, 3.6vw, 3rem);
+      }
+
+      .features__grid {
+        gap: 1rem;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+      }
+
+      .features__category {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        background: var(--bold-surface);
+        box-shadow: var(--bold-shadow);
+        padding: var(--bold-panel-padding);
+      }
+
+      .features__cat-title {
+        font-family: var(--bold-font-heading);
+        font-size: 0.74rem;
+        color: var(--bold-accent);
+        border-bottom: var(--bold-border-width) solid var(--bold-border);
+      }
+
+      .features__item {
+        border-bottom-color: rgba(21, 21, 21, 0.16);
+        color: var(--bold-text);
+        font-weight: 500;
+
+        &::before {
+          width: 7px;
+          height: 7px;
+          border-radius: 0;
+          background: var(--bold-text);
+        }
+      }
+    }
+
+    &--lifestyle {
+      background: transparent;
+
+      .features__grid {
+        gap: 1rem;
+        background: transparent;
+        border: none;
+      }
+
+      .features__category {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+        padding: calc(var(--lifestyle-panel-padding) - 0.1rem);
+      }
+
+      .features__cat-title {
+        font-family: var(--lifestyle-font-body);
+        font-size: 0.68rem;
+        color: var(--lifestyle-muted);
+        border-bottom-color: rgba(104, 90, 72, 0.12);
+      }
+
+      .features__item {
+        border-bottom-color: rgba(104, 90, 72, 0.1);
+        color: var(--lifestyle-text);
+
+        &::before {
+          width: 6px;
+          height: 6px;
+          background: var(--lifestyle-accent);
+          opacity: 0.72;
+        }
       }
     }
   }

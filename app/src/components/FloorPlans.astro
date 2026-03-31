@@ -1,16 +1,18 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
+const { property, variant = 'classic' } = Astro.props;
 const { floor_plans, address } = property;
 ---
 
 {floor_plans && floor_plans.length > 0 && (
-  <section class="plans section section--mid" id="floor-plans" aria-label="Floor plans">
+  <section class:list={['plans section section--mid', variant === 'modern' && 'plans--modern', variant === 'bold' && 'plans--bold', variant === 'lifestyle' && 'plans--lifestyle']} id="floor-plans" aria-label="Floor plans">
     <div class="container">
 
       <div class="plans__header">
@@ -155,6 +157,117 @@ const { floor_plans, address } = property;
         .plans__item:hover & {
           transform: scale(1.02);
         }
+      }
+    }
+
+    &--modern {
+      background: transparent;
+
+      .plans__item {
+        border: 1px solid var(--modern-border);
+        border-radius: var(--modern-radius);
+        box-shadow: var(--modern-shadow);
+      }
+
+      .plans__label-row {
+        border-bottom-color: rgba(148, 163, 184, 0.18);
+      }
+
+      .plans__num {
+        font-family: var(--modern-font-heading);
+        color: rgba(15, 23, 42, 0.16);
+      }
+
+      .plans__name {
+        font-family: var(--modern-font-heading);
+        color: var(--modern-text);
+      }
+
+      .plans__desc,
+      .plans__note {
+        color: var(--modern-muted);
+      }
+
+      .plans__img-wrap {
+        background: var(--modern-surface-muted);
+      }
+
+      .plans__label-row {
+        padding: 1.35rem 1.5rem;
+      }
+    }
+
+    &--bold {
+      background: transparent;
+
+      .plans__item {
+        border: var(--bold-border-width) solid var(--bold-border);
+        border-radius: var(--bold-radius);
+        box-shadow: var(--bold-shadow);
+      }
+
+      .plans__label-row {
+        padding: 1.1rem 1.2rem;
+        border-bottom: var(--bold-border-width) solid var(--bold-border);
+        background: var(--bold-surface-alt);
+      }
+
+      .plans__num {
+        font-family: var(--bold-font-heading);
+        color: rgba(21, 21, 21, 0.24);
+      }
+
+      .plans__name {
+        font-family: var(--bold-font-heading);
+        color: var(--bold-text);
+      }
+
+      .plans__desc,
+      .plans__note {
+        color: var(--bold-muted);
+      }
+
+      .plans__img-wrap {
+        background: var(--bold-surface);
+      }
+    }
+
+    &--lifestyle {
+      background: transparent;
+
+      .plans__item {
+        border: 1px solid var(--lifestyle-border);
+        border-radius: var(--lifestyle-radius);
+        background: var(--lifestyle-surface);
+        box-shadow: var(--lifestyle-shadow);
+      }
+
+      .plans__label-row {
+        padding: 1.35rem 1.5rem;
+        border-bottom-color: rgba(104, 90, 72, 0.12);
+      }
+
+      .plans__num,
+      .plans__name {
+        font-family: var(--lifestyle-font-heading);
+      }
+
+      .plans__num {
+        color: rgba(111, 133, 119, 0.28);
+      }
+
+      .plans__name {
+        color: var(--lifestyle-text);
+        font-weight: 600;
+      }
+
+      .plans__desc,
+      .plans__note {
+        color: var(--lifestyle-muted);
+      }
+
+      .plans__img-wrap {
+        background: var(--lifestyle-surface-muted);
       }
     }
   }

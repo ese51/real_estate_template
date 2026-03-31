@@ -108,6 +108,51 @@ These sections only render when their data is present:
 
 ---
 
+## Template Selection
+
+The frontend supports multiple visual templates while keeping the same property schema and section contract.
+
+- Template 1: `classic`
+- Template 2: `modern`
+- Template 3: `bold`
+- Template 4: `lifestyle`
+
+Choose the site variant in property JSON:
+
+```json
+"meta": {
+  "slug": "9250persimmontree",
+  "site_title": "...",
+  "site_description": "...",
+  "template": "modern"
+}
+```
+
+If you are generating a site through the builder payload, you can also pass:
+
+```json
+{
+  "site_template": "modern"
+}
+```
+
+When omitted, the site defaults to `classic`.
+
+See the internal guide at [`docs/template-selection-guide.md`](./docs/template-selection-guide.md) for when to choose each template.
+
+## Internal Demo Support
+
+The repo includes one representative listing rendered through all four templates for review and sales demos:
+
+- `/1615nwakefield` → `classic`
+- `/1615nwakefield-modern` → `modern`
+- `/1615nwakefield-bold` → `bold`
+- `/1615nwakefield-lifestyle` → `lifestyle`
+
+These routes all use the same underlying listing content, so differences are template-driven.
+
+---
+
 ## Deployment (Netlify)
 
 `netlify.toml` at the repo root handles all build configuration:

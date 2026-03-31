@@ -1,0 +1,211 @@
+{
+  "_data_source": "Compass",
+  "_data_source_url": "https://www.compass.com/homedetails/1615-N-Wakefield-St-Arlington-VA-22207/1VBBWF_pid/",
+  "_data_last_verified": "2026-03-24",
+  "_mls": "VAAR2070006",
+  "_demo_note": "This is a demo marketing site built as a template. It is not the official brokerage site. Contact the listing agent at Compass for official inquiries.",
+
+  "meta": {
+    "slug": "1615nwakefield-bold",
+    "site_title": "1615 N Wakefield St — Arlington, VA 22207",
+    "site_description": "Custom four-level modern Colonial in North Arlington — 6 bedrooms, 7.5 baths, 7,584 sq ft, rooftop deck. Built 2025. Listed at $2,845,000.",
+    "og_image": "/images/1615nwakefield/exterior-front.webp",
+    "template": "bold"
+  },
+
+  "address": {
+    "street": "1615 N Wakefield St",
+    "city": "Arlington",
+    "state": "VA",
+    "zip": "22207",
+    "full": "1615 N Wakefield St, Arlington, VA 22207"
+  },
+
+  "price": 2845000,
+  "price_display": "$2,845,000",
+  "status": "For Sale",
+
+  "tagline": "One of North Arlington's largest and most thoughtfully built new homes — 7,500+ sq ft across four finished levels.",
+
+  "description": "<p>Most new builds in North Arlington give you space or flexibility — not both. This custom four-level residence delivers a refined home with five ensuite bedrooms, a chef's kitchen with Sub-Zero and Wolf appliances, and wide-plank solid wood floors — plus two levels that adapt to how your family actually lives.</p><p>Designed by Eustilus Architects, built by All Terrain Contracting, and completed in 2025, this is not a copy-paste spec home but a carefully executed custom modern Colonial. A dramatic open-riser white oak staircase anchors the home, connecting spaces that feel both open and intentional. Custom hand-built cabinetry runs throughout the kitchen, wet bars, and bathrooms.</p><p>The second level features five spacious ensuite bedrooms, each with a walk-in closet — a rare combination of scale and privacy. The vaulted top floor serves as a true flex space with a full bath, wet bar, generous storage, and access to a private rooftop deck with treetop views. The daylit walk-out lower level, with its own entrance, is well suited for guests, an au pair, or multi-generational living.</p><p>Built for longevity: solid 2x6 framing, brick and cement exterior, premium Pella windows, three-zone HVAC, and dual oversized tankless water heaters. Set on a quiet, tree-lined street in the heart of Waverly Hills — 0.9 miles to Ballston Metro and 0.6 miles to the Langston Boulevard corridor.</p>",
+
+  "stats": {
+    "beds": 6,
+    "baths": 7.5,
+    "sqft": 7584,
+    "lot_size": "0.18 acres (8,042 sq ft)",
+    "year_built": 2025,
+    "garage": "2-car garage",
+    "style": "Modern Colonial"
+  },
+
+  "gallery": {
+    "hero_image": "/images/1615nwakefield/exterior-front.webp",
+    "images": [
+      { "url": "/images/1615nwakefield/exterior-front.webp",   "alt": "Front exterior", "caption": "Curb appeal" },
+      { "url": "/images/1615nwakefield/exterior-front-2.webp", "alt": "Front exterior — alternate angle" },
+      { "url": "/images/1615nwakefield/exterior-1.webp",       "alt": "Exterior" },
+      { "url": "/images/1615nwakefield/living-1.webp",         "alt": "Living room", "caption": "Main living area" },
+      { "url": "/images/1615nwakefield/living-2.webp",         "alt": "Living room — view 2" },
+      { "url": "/images/1615nwakefield/living-3.webp",         "alt": "Living room — view 3" },
+      { "url": "/images/1615nwakefield/kitchen-1.webp",        "alt": "Kitchen", "caption": "Chef's kitchen" },
+      { "url": "/images/1615nwakefield/kitchen-2.webp",        "alt": "Kitchen — view 2" },
+      { "url": "/images/1615nwakefield/kitchen-3.webp",        "alt": "Kitchen — view 3" },
+      { "url": "/images/1615nwakefield/kitchen-4.webp",        "alt": "Kitchen — view 4" },
+      { "url": "/images/1615nwakefield/kitchen-5.webp",        "alt": "Kitchen — view 5" },
+      { "url": "/images/1615nwakefield/kitchen-6.webp",        "alt": "Kitchen — view 6" },
+      { "url": "/images/1615nwakefield/kitchen-7.webp",        "alt": "Kitchen — view 7" },
+      { "url": "/images/1615nwakefield/kitchen-8.webp",        "alt": "Kitchen — view 8" },
+      { "url": "/images/1615nwakefield/kitchen-9.webp",        "alt": "Kitchen — view 9" },
+      { "url": "/images/1615nwakefield/dining-1.webp",         "alt": "Dining room", "caption": "Formal dining" },
+      { "url": "/images/1615nwakefield/dining-2.webp",         "alt": "Dining room — view 2" },
+      { "url": "/images/1615nwakefield/dining-3.webp",         "alt": "Dining room — view 3" },
+      { "url": "/images/1615nwakefield/bedroom-1.webp",        "alt": "Bedroom suite", "caption": "Ensuite bedroom" },
+      { "url": "/images/1615nwakefield/bedroom-2.webp",        "alt": "Bedroom — view 2" },
+      { "url": "/images/1615nwakefield/bathroom-1.webp",       "alt": "Bath", "caption": "Spa bath" },
+      { "url": "/images/1615nwakefield/bathroom-2.webp",       "alt": "Bath — view 2" },
+      { "url": "/images/1615nwakefield/bathroom-3.webp",       "alt": "Bath — view 3" },
+      { "url": "/images/1615nwakefield/bathroom-4.webp",       "alt": "Bath — view 4" },
+      { "url": "/images/1615nwakefield/bathroom-5.webp",       "alt": "Bath — view 5" },
+      { "url": "/images/1615nwakefield/bathroom-6.webp",       "alt": "Bath — view 6" },
+      { "url": "/images/1615nwakefield/bathroom-7.webp",       "alt": "Bath — view 7" },
+      { "url": "/images/1615nwakefield/bathroom-8.webp",       "alt": "Bath — view 8" },
+      { "url": "/images/1615nwakefield/exterior-back.webp",    "alt": "Rear exterior", "caption": "Private rear grounds" },
+      { "url": "/images/1615nwakefield/exterior-back-2.webp",  "alt": "Rear exterior — view 2" },
+      { "url": "/images/1615nwakefield/exterior-porch.webp",   "alt": "Entry porch" },
+      { "url": "/images/1615nwakefield/exterior-yard.webp",    "alt": "Yard" },
+      { "url": "/images/1615nwakefield/extra-1.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-2.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-3.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-4.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-5.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-6.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-7.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-8.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-9.webp",          "alt": "Interior detail" },
+      { "url": "/images/1615nwakefield/extra-10.webp",         "alt": "Interior detail" }
+    ]
+  },
+
+  "features": [
+    {
+      "category": "Architecture & Construction",
+      "items": [
+        "Designed by Eustilus Architects, built by All Terrain Contracting",
+        "Completed 2025 — custom new construction, not spec",
+        "Solid 2x6 framing, brick and HardiPlank cement exterior",
+        "Premium Pella windows throughout",
+        "Concrete perimeter foundation",
+        "Asphalt and metal roof"
+      ]
+    },
+    {
+      "category": "Interior & Kitchen",
+      "items": [
+        "Open-riser white oak staircase as central architectural feature",
+        "Wide-plank solid hardwood floors spanning three levels",
+        "Custom hand-built cabinetry in kitchen, wet bars, and baths",
+        "Chef's kitchen with Sub-Zero refrigerator and Wolf appliances",
+        "Gas fireplace",
+        "Wet bars on multiple levels"
+      ]
+    },
+    {
+      "category": "Bedrooms & Baths",
+      "items": [
+        "6 bedrooms total — 5 ensuite on second level, each with walk-in closet",
+        "7 full baths + 1 half bath",
+        "Vaulted top floor with full bath, wet bar, and rooftop deck access",
+        "Walk-out lower level bedroom suite with own entrance",
+        "Lower level suited for guests, au pair, or multi-generational living"
+      ]
+    },
+    {
+      "category": "Systems & Efficiency",
+      "items": [
+        "Three-zone HVAC (forced air + heat pump)",
+        "Dual oversized tankless water heaters",
+        "Public sewer and water",
+        "2-car garage",
+        "No HOA"
+      ]
+    }
+  ],
+
+  "schools": [
+    {
+      "name": "Glebe Elementary School",
+      "level": "Elementary",
+      "district": "Arlington County Public Schools",
+      "rating": null,
+      "distance": null
+    },
+    {
+      "name": "Dorothy Hamm Middle School",
+      "level": "Middle",
+      "district": "Arlington County Public Schools",
+      "rating": null,
+      "distance": null
+    },
+    {
+      "name": "Washington Liberty High School",
+      "level": "High",
+      "district": "Arlington County Public Schools",
+      "rating": null,
+      "distance": null
+    }
+  ],
+
+  "location": {
+    "lat": 38.8918,
+    "lng": -77.1131,
+    "neighborhood": "Waverly Hills, North Arlington",
+    "highlights": [
+      "0.9 miles to Ballston Metro (Silver & Orange lines)",
+      "0.6 miles to Langston Boulevard retail corridor",
+      "0.6 miles to Virginia Hospital Center",
+      "Access to Custis Trail — bike to Georgetown in ~20–25 min",
+      "Quiet, tree-lined street in the 22207 zip code"
+    ]
+  },
+
+  "floor_plans": [
+    {
+      "name": "First Floor",
+      "image": "/images/1615nwakefield/floorplan1st.webp",
+      "description": "Entry, kitchen, dining, living, and garage access."
+    },
+    {
+      "name": "Second Floor",
+      "image": "/images/1615nwakefield/floorplan2nd.webp",
+      "description": "Five ensuite bedrooms, each with walk-in closet."
+    },
+    {
+      "name": "Third Floor",
+      "image": "/images/1615nwakefield/floorplan3rd.webp",
+      "description": "Vaulted flex space with full bath, wet bar, and rooftop deck access."
+    },
+    {
+      "name": "Lower Level",
+      "image": "/images/1615nwakefield/floorplanbasement.webp",
+      "description": "Daylit walk-out lower level with separate entrance — bedroom, full bath, and living area."
+    }
+  ],
+
+  "agent": {
+    "name": "Jonathan J Fox",
+    "title": "Licensed Real Estate Agent",
+    "phone": "(202) 322-9379",
+    "email": "jonathan.fox@compass.com",
+    "photo": "/images/agents/jonathan-fox.webp",
+    "brokerage": "Compass",
+    "license": null,
+    "demo_disclaimer": "This is a demo property marketing site created to showcase an alternative listing presentation. It is not the official listing page. For official inquiries, please contact the listing agent at Compass."
+  },
+
+  "schedule_showing": {
+    "enabled": true,
+    "calendly_url": "",
+    "contact_form": true
+  }
+}

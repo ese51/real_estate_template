@@ -1,15 +1,34 @@
 ---
 import type { PropertyData } from '../types/property';
+import type { SiteTemplateId } from '../templates/site';
 
 interface Props {
   property: PropertyData;
+  variant?: SiteTemplateId;
 }
 
-const { property } = Astro.props;
-const { address, schedule_showing } = property;
+const { property, variant = 'classic' } = Astro.props;
+const { address, schedule_showing, floor_plans, schools } = property;
+
+const navLinks = variant === 'modern' || variant === 'bold' || variant === 'lifestyle'
+  ? [
+      { href: '#gallery', label: 'Gallery' },
+      { href: '#summary', label: 'Overview' },
+      { href: '#features', label: 'Features' },
+      ...(schools && schools.length > 0 ? [{ href: '#schools', label: 'Schools' }] : []),
+      { href: '#location', label: 'Location' },
+      { href: '#contact', label: 'Contact' },
+    ]
+  : [
+      { href: '#about', label: 'About' },
+      { href: '#features', label: 'Features' },
+      { href: '#floor-plans', label: 'Plans' },
+      { href: '#location', label: 'Location' },
+      { href: '#contact', label: 'Contact' },
+    ];
 ---
 
-<header class="header" id="header">
+<header class:list={['header', variant === 'modern' && 'header--modern', variant === 'bold' && 'header--bold', variant === 'lifestyle' && 'header--lifestyle']} id="header">
   <div class="header__inner container">
 
     <a href="#hero" class="header__brand" aria-label="Back to top">
@@ -19,11 +38,9 @@ const { address, schedule_showing } = property;
 
     <!-- Desktop nav — hidden on mobile via CSS -->
     <nav class="header__nav" aria-label="Page sections">
-      <a href="#about"       class="header__link">About</a>
-      <a href="#features"    class="header__link">Features</a>
-      <a href="#floor-plans" class="header__link">Plans</a>
-      <a href="#location"    class="header__link">Location</a>
-      <a href="#contact"     class="header__link">Contact</a>
+      {navLinks.map((link) => (
+        <a href={link.href} class="header__link">{link.label}</a>
+      ))}
       {schedule_showing.enabled && (
         <a href="#schedule" class="header__cta">Schedule a Tour</a>
       )}
@@ -56,11 +73,9 @@ const { address, schedule_showing } = property;
     aria-label="Mobile navigation"
   >
     <div class="container">
-      <a href="#about"       class="header__mobile-link">About</a>
-      <a href="#features"    class="header__mobile-link">Features</a>
-      <a href="#floor-plans" class="header__mobile-link">Plans</a>
-      <a href="#location"    class="header__mobile-link">Location</a>
-      <a href="#contact"     class="header__mobile-link">Contact</a>
+      {navLinks.map((link) => (
+        <a href={link.href} class="header__mobile-link">{link.label}</a>
+      ))}
       {schedule_showing.enabled && (
         <a href="#schedule" class="header__mobile-link header__mobile-link--accent">
           Schedule a Tour
@@ -223,6 +238,276 @@ const { address, schedule_showing } = property;
         background: #fff;
         transform: translateY(-1px);
       }
+    }
+
+    &--modern {
+      // Hero phase: transparent — house is the surface
+      background: transparent;
+
+      // Scrolled: restore full modern chrome
+      &.is-scrolled {
+        background: rgba(248, 250, 252, 0.92);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+
+        .header__street { color: #0f172a; }
+        .header__city { color: #64748b; }
+        .header__link { color: #475569; &:hover { color: #0f172a; } }
+        .header__cta {
+          background: var(--modern-accent);
+          color: #fff;
+          border-color: transparent;
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+          &:hover { background: #1e293b; }
+        }
+        .header__hamburger {
+          border-color: rgba(148, 163, 184, 0.34);
+          &:hover { border-color: rgba(100, 116, 139, 0.6); }
+        }
+        .header__ham-bar { background: #0f172a; }
+      }
+
+      .header__inner { height: 76px; }
+
+      .header__street {
+        font-family: var(--modern-font-heading);
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+      }
+
+      .header__city {
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .header__nav { gap: 1.2rem; }
+
+      .header__link {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.68);
+        &:hover { color: #fff; }
+      }
+
+      .header__cta {
+        padding: 0.52rem 1rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        box-shadow: none;
+        backdrop-filter: blur(8px);
+        &:hover { background: rgba(255, 255, 255, 0.2); }
+      }
+
+      .header__hamburger {
+        border-radius: 999px;
+        border-color: rgba(255, 255, 255, 0.24);
+        &:hover { border-color: rgba(255, 255, 255, 0.42); }
+      }
+
+      .header__ham-bar { background: rgba(255, 255, 255, 0.82); }
+
+      .header__mobile-menu {
+        background: rgba(248, 250, 252, 0.96);
+        border-top: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      .header__mobile-link {
+        color: #334155;
+        font-weight: 600;
+        &:hover { color: #0f172a; }
+      }
+
+      .header__mobile-link--accent { color: #0f172a; }
+    }
+
+    &--bold {
+      // Hero phase: transparent — full bold personality appears on scroll
+      background: transparent;
+      border-bottom-color: transparent;
+
+      // Scrolled: snap to full bold chrome
+      &.is-scrolled {
+        background: rgba(249, 244, 236, 0.98);
+        border-bottom: var(--bold-border-width) solid var(--bold-border);
+
+        .header__street { color: var(--bold-text); }
+        .header__city { color: var(--bold-muted); }
+        .header__link { color: var(--bold-text); &:hover { color: var(--bold-accent); } }
+        .header__cta {
+          background: var(--bold-accent);
+          color: #fff;
+          border: var(--bold-border-width) solid var(--bold-border);
+          box-shadow: 4px 4px 0 var(--bold-border);
+          &:hover { background: #1e42b8; transform: translate(-1px, -1px); }
+        }
+        .header__hamburger {
+          border: var(--bold-border-width) solid var(--bold-border);
+          background: var(--bold-surface);
+        }
+        .header__ham-bar { background: var(--bold-text); }
+      }
+
+      .header__inner { height: 74px; }
+
+      .header__street {
+        font-family: var(--bold-font-heading);
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: -0.03em;
+      }
+
+      .header__city {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+      }
+
+      .header__nav { gap: 1rem; }
+
+      .header__link {
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        &:hover { color: #fff; }
+      }
+
+      .header__cta {
+        border-radius: var(--bold-radius);
+        border: var(--bold-border-width) solid rgba(255, 255, 255, 0.28);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        box-shadow: none;
+        &:hover { background: rgba(255, 255, 255, 0.2); transform: none; }
+      }
+
+      .header__hamburger {
+        border: var(--bold-border-width) solid rgba(255, 255, 255, 0.24);
+        border-radius: var(--bold-radius);
+        background: transparent;
+      }
+
+      .header__ham-bar { background: rgba(255, 255, 255, 0.82); }
+
+      .header__mobile-menu {
+        background: var(--bold-surface);
+        border-top: var(--bold-border-width) solid var(--bold-border);
+        box-shadow: 0 10px 0 rgba(21, 21, 21, 0.04);
+      }
+
+      .header__mobile-link {
+        color: var(--bold-text);
+        font-weight: 700;
+        &:hover { color: var(--bold-accent); }
+      }
+
+      .header__mobile-link--accent { color: var(--bold-accent); }
+    }
+
+    &--lifestyle {
+      // Hero phase: transparent — warm editorial chrome appears on scroll
+      background: transparent;
+      border-bottom-color: transparent;
+
+      // Scrolled: restore full lifestyle warmth
+      &.is-scrolled {
+        background: rgba(255, 250, 244, 0.94);
+        border-bottom: 1px solid var(--lifestyle-border);
+        box-shadow: 0 10px 30px rgba(53, 43, 31, 0.06);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+
+        .header__street { font-family: var(--lifestyle-font-heading); color: var(--lifestyle-text); font-weight: 600; }
+        .header__city { color: var(--lifestyle-muted); }
+        .header__link { color: var(--lifestyle-muted); &:hover { color: var(--lifestyle-text); } }
+        .header__cta {
+          background: var(--lifestyle-accent);
+          color: #fff;
+          border-color: transparent;
+          box-shadow: 0 10px 24px rgba(111, 133, 119, 0.2);
+          &:hover { background: #5e7568; }
+        }
+        .header__hamburger {
+          border-radius: 999px;
+          border-color: var(--lifestyle-border-strong);
+          background: rgba(255, 250, 244, 0.9);
+        }
+        .header__ham-bar { background: var(--lifestyle-text); }
+      }
+
+      .header__inner { height: 78px; }
+
+      .header__street {
+        font-family: var(--lifestyle-font-heading);
+        font-size: 1rem;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -0.02em;
+      }
+
+      .header__city {
+        font-size: 0.66rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .header__nav { gap: 1.1rem; }
+
+      .header__link {
+        font-size: 0.73rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.65);
+        &:hover { color: #fff; }
+      }
+
+      .header__cta {
+        padding: 0.62rem 1.1rem;
+        border-radius: var(--lifestyle-button-radius);
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        box-shadow: none;
+        backdrop-filter: blur(8px);
+        &:hover { background: rgba(255, 255, 255, 0.2); }
+      }
+
+      .header__hamburger {
+        border-radius: 999px;
+        border-color: rgba(255, 255, 255, 0.24);
+        background: transparent;
+        &:hover { border-color: rgba(255, 255, 255, 0.42); }
+      }
+
+      .header__ham-bar { background: rgba(255, 255, 255, 0.82); }
+
+      .header__mobile-menu {
+        background: rgba(255, 250, 244, 0.96);
+        border-top: 1px solid var(--lifestyle-border);
+        box-shadow: 0 18px 36px rgba(53, 43, 31, 0.08);
+      }
+
+      .header__mobile-link {
+        color: var(--lifestyle-muted);
+        font-weight: 600;
+        &:hover { color: var(--lifestyle-text); }
+      }
+
+      .header__mobile-link--accent { color: var(--lifestyle-text); }
     }
 
     // ── Mobile right-side controls: Tour CTA + hamburger ──

@@ -39,6 +39,7 @@ Each property site is driven entirely by one JSON file. The schema is validated 
 | `site_title` | string | Browser `<title>` tag. |
 | `site_description` | string | Meta description for SEO/sharing. |
 | `og_image` | string? | Path to social share image, relative to `/public`. |
+| `template` | `"classic"` \| `"modern"` \| `"bold"` \| `"lifestyle"`? | Optional visual template selector. Defaults to `"classic"` when omitted. |
 
 ---
 

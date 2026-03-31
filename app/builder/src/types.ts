@@ -27,6 +27,7 @@ export interface HiveMindListingPayload {
   artifact_folder_path?: string | null;
   slug?: string | null;
   agent_image_url?: string | null;
+  site_template?: string | null;
 }
 
 export interface BuildSiteResult {
@@ -35,6 +36,9 @@ export interface BuildSiteResult {
   dist_dir: string;
   route_path: string;
   files_written: string[];
+  published: true;
+  commit_hash: string;
+  public_url: string;
 }
 
 export interface ResolvedImage {

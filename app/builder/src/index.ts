@@ -1,3 +1,4 @@
+import * as nodeFs from 'node:fs';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -12,6 +13,8 @@ import type {
 type Nullable<T> = T | null | undefined;
 const WINDOWS_DRIVE_PATH_PATTERN = /^[a-zA-Z]:[\\/]/;
 const WINDOWS_ASTRO_BUILD_HEAP_MB = 4096;
+const NETLIFY_SITE_URL = (process.env.NETLIFY_SITE_URL ?? 'https://relistings.netlify.app').replace(/\/$/, '');
+const PUBLISH_BRANCH = process.env.PUBLISH_BRANCH ?? 'main';
 const REMOTE_DOWNLOAD_TIMEOUT_MS = 15000;
 const REMOTE_DOWNLOAD_MAX_ATTEMPTS = 2;
 const RETRYABLE_DOWNLOAD_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -368,6 +371,9 @@ async function resetDirectory(dirPath: string): Promise<void> {
 }
 
 async function preparePropertyJsonPath(filePath: string, force: boolean): Promise<void> {
+  const directoryPath = path.dirname(filePath);
+  await fs.mkdir(directoryPath, { recursive: true });
+
   const exists = await pathExists(filePath);
   if (!exists) {
     return;
@@ -380,6 +386,38 @@ async function preparePropertyJsonPath(filePath: string, force: boolean): Promis
   }
 
   await fs.rm(filePath, { force: true });
+}
+
+async function writePropertyJsonOrThrow(
+  propertyJsonPath: string,
+  templateData: unknown
+): Promise<void> {
+  const { existsSync: existsSyncFn } = nodeFs as unknown as {
+    existsSync: (targetPath: string) => boolean;
+  };
+  const absolutePath = path.resolve(propertyJsonPath);
+  const directoryPath = path.dirname(absolutePath);
+
+  process.stderr.write(`[builder] WRITE_PATH absolute_path=${absolutePath}\n`);
+  process.stderr.write(`[builder] WRITE_DIRECTORY_CHECK absolute_path=${directoryPath}\n`);
+  await fs.mkdir(directoryPath, { recursive: true });
+  process.stderr.write(`[builder] WRITE_DIRECTORY_READY absolute_path=${directoryPath}\n`);
+
+  try {
+    process.stderr.write(`[builder] WRITE_START absolute_path=${absolutePath}\n`);
+    await fs.writeFile(absolutePath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
+    process.stderr.write(`[builder] WRITE_SUCCESS absolute_path=${absolutePath}\n`);
+  } catch (error) {
+    const message = error instanceof Error ? error.stack ?? error.message : String(error);
+    process.stderr.write(`[builder] WRITE_FAILURE absolute_path=${absolutePath} error=${message}\n`);
+    throw new Error(`Property JSON write failed at ${absolutePath}: ${message}`);
+  }
+
+  const exists = existsSyncFn(absolutePath);
+  process.stderr.write(`[builder] WRITE_EXISTS absolute_path=${absolutePath} exists=${exists}\n`);
+  if (!exists) {
+    throw new Error(`Property JSON write failed verification: existsSync returned false for ${absolutePath}`);
+  }
 }
 
 async function prepareListingImagesDirectory(dirPath: string, force: boolean): Promise<void> {
@@ -629,6 +667,108 @@ async function runAppBuild(appDir: string, input: BuildDiagnosticInput): Promise
   }
 }
 
+function runGitCommand(args: string[], repoRoot: string): { stdout: string; stderr: string; status: number | null } {
+  const result = spawnSync('git', args, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    shell: false,
+  });
+
+  if (result.error) {
+    throw new Error(`[publisher] git ${args[0]} failed to launch: ${result.error.message}`);
+  }
+
+  const stdout = typeof result.stdout === 'string' ? result.stdout.trim() : '';
+  const stderr = typeof result.stderr === 'string' ? result.stderr.trim() : '';
+  return { stdout, stderr, status: result.status };
+}
+
+function gitPushListing(options: {
+  repoRoot: string;
+  branch: string;
+  slug: string;
+  propertyJsonPath: string;
+  listingImagesDir: string;
+  /** Disk path of the agent image, if one was downloaded for this listing. */
+  agentImageDiskPath?: string;
+}): { commitHash: string; publicUrl: string } {
+  const { repoRoot, branch, slug, propertyJsonPath, listingImagesDir, agentImageDiskPath } = options;
+
+  process.stderr.write(
+    `[publisher] Starting git publish: ${JSON.stringify({ repoRoot, branch, slug, propertyJsonPath, listingImagesDir, agentImageDiskPath: agentImageDiskPath ?? null })}\n`
+  );
+
+  // Contract check 3: stage property JSON, listing images, and agent image (if present).
+  const addTargets = [propertyJsonPath, listingImagesDir];
+  if (agentImageDiskPath) {
+    addTargets.push(agentImageDiskPath);
+  }
+  const addResult = runGitCommand(['add', ...addTargets], repoRoot);
+  if (addResult.status !== 0) {
+    throw new Error(
+      `[publisher] git add failed (exit ${addResult.status}). stderr: ${addResult.stderr}`
+    );
+  }
+
+  // Verify the property JSON is now in the git index (staged or already committed).
+  // git ls-files --error-unmatch exits non-zero if the file is unknown to git,
+  // which would mean it is gitignored or the path resolved incorrectly.
+  const lsResult = runGitCommand(['ls-files', '--error-unmatch', propertyJsonPath], repoRoot);
+  if (lsResult.status !== 0) {
+    throw new Error(
+      `[publisher] Property JSON is not tracked in the git index after git add. ` +
+        `File may be gitignored or the path is wrong. path: ${propertyJsonPath}`
+    );
+  }
+  process.stderr.write(`[publisher] Property JSON confirmed in git index: ${propertyJsonPath}\n`);
+
+  // Commit — tolerate "nothing to commit" so force-rebuilds stay safe
+  const commitMessage = `Add listing: ${slug}`;
+  const commitResult = runGitCommand(['commit', '-m', commitMessage], repoRoot);
+  const combinedCommitOutput = `${commitResult.stdout} ${commitResult.stderr}`;
+  const nothingToCommit =
+    combinedCommitOutput.includes('nothing to commit') ||
+    combinedCommitOutput.includes('nothing added to commit');
+
+  if (commitResult.status !== 0 && !nothingToCommit) {
+    throw new Error(
+      `[publisher] git commit failed (exit ${commitResult.status}). stderr: ${commitResult.stderr}`
+    );
+  }
+
+  // Resolve commit hash (HEAD may be the prior commit when nothing changed)
+  const revResult = runGitCommand(['rev-parse', 'HEAD'], repoRoot);
+  const commitHash = revResult.stdout || 'unknown';
+
+  if (nothingToCommit) {
+    process.stderr.write(
+      `[publisher] Nothing new to commit (property JSON already in repo HEAD): ${JSON.stringify({ commitHash, slug })}\n`
+    );
+  } else {
+    process.stderr.write(
+      `[publisher] Committed: ${JSON.stringify({ commitHash, commitMessage })}\n`
+    );
+  }
+
+  // Push — fail loudly if this does not succeed
+  const pushResult = runGitCommand(['push', 'origin', branch], repoRoot);
+  if (pushResult.status !== 0) {
+    throw new Error(
+      `[publisher] git push FAILED (exit ${pushResult.status}). ` +
+        `Push to origin/${branch} did not succeed. ` +
+        `repo: ${repoRoot} | stderr: ${pushResult.stderr} | stdout: ${pushResult.stdout}`
+    );
+  }
+
+  const publicUrl = `${NETLIFY_SITE_URL}/${slug}`;
+
+  process.stderr.write(
+    `[publisher] Push succeeded: ${JSON.stringify({ commitHash, branch, repoRoot, publicUrl })}\n`
+  );
+
+  return { commitHash, publicUrl };
+}
+
 export async function build_site_from_listing(
   payload: HiveMindListingPayload,
   template: string | null = null,
@@ -641,6 +781,7 @@ export async function build_site_from_listing(
     : null;
 
   const paths = getTemplatePaths();
+  const repoRoot = path.resolve(paths.app_dir, '..');
   const slug = await ensureSlug(payload, paths.properties_dir);
   const propertyJsonPath = path.join(paths.properties_dir, `${slug}.json`);
   const listingImagesDir = path.join(paths.listing_images_dir, slug);
@@ -648,6 +789,17 @@ export async function build_site_from_listing(
   const remoteDownloadContext: RemoteDownloadContext = {
     referer: isNonEmptyString(payload.source_url) ? payload.source_url : undefined,
   };
+
+  process.stderr.write(
+    `[builder] INIT: ${JSON.stringify({
+      cwd: process.cwd(),
+      repo_root: repoRoot,
+      app_dir: paths.app_dir,
+      properties_dir: paths.properties_dir,
+      slug,
+      property_json_path: propertyJsonPath,
+    })}\n`
+  );
 
   await preparePropertyJsonPath(propertyJsonPath, force_rebuild);
   await prepareListingImagesDirectory(listingImagesDir, force_rebuild);
@@ -682,6 +834,7 @@ export async function build_site_from_listing(
   }
 
   let agentImagePublicPath: string | undefined;
+  let agentImageDiskPath: string | undefined;
   const agentImageSource = [
     payload.agent_image_url,
     typeof payload.listing_agent === 'object' && payload.listing_agent
@@ -696,6 +849,7 @@ export async function build_site_from_listing(
     await copyOrDownloadFile(agentImageSource, destinationPath, remoteDownloadContext);
     writtenFiles.push(destinationPath);
     agentImagePublicPath = `/images/agents/${destinationFileName}`;
+    agentImageDiskPath = destinationPath;
   }
 
   const templateData = selectedTemplate.map_payload_to_template_data({
@@ -708,7 +862,7 @@ export async function build_site_from_listing(
     agentImagePublicPath,
   });
 
-  await fs.writeFile(propertyJsonPath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
+  await writePropertyJsonOrThrow(propertyJsonPath, templateData);
   writtenFiles.push(propertyJsonPath);
 
   await runAppBuild(paths.app_dir, {
@@ -723,11 +877,13 @@ export async function build_site_from_listing(
     'index.html'
   );
 
+  // Contract check 2: Astro must have emitted the slug's index.html.
   if (!await pathExists(builtRoutePath)) {
     throw new Error(
       `Post-build route missing: Astro build completed but expected route was not generated: ${builtRoutePath}`
     );
   }
+  process.stderr.write(`[builder] Built route verified: ${builtRoutePath}\n`);
 
   if (resolvedArtifactFolderPath) {
     const artifactFiles = await stageArtifact(
@@ -741,12 +897,25 @@ export async function build_site_from_listing(
     writtenFiles.push(...artifactFiles);
   }
 
+  // Contract step 6–9: git add → commit → push. No flag. No fallback. Throws on any failure.
+  const { commitHash, publicUrl } = gitPushListing({
+    repoRoot,
+    branch: PUBLISH_BRANCH,
+    slug,
+    propertyJsonPath,
+    listingImagesDir,
+    agentImageDiskPath,
+  });
+
   return {
     slug,
     template_id: selectedTemplate.id,
     dist_dir: paths.dist_dir,
     route_path: selectedTemplate.output_behavior.route_path(slug),
     files_written: writtenFiles,
+    published: true,
+    commit_hash: commitHash,
+    public_url: publicUrl,
   };
 }
 
