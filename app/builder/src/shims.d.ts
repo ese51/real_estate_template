@@ -57,6 +57,7 @@ declare module 'node:path' {
     join: (...parts: string[]) => string;
     dirname: (value: string) => string;
     extname: (value: string) => string;
+    basename: (value: string, ext?: string) => string;
   };
   export = path;
 }

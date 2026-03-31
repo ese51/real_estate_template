@@ -365,6 +365,72 @@ async function pathExists(targetPath: string): Promise<boolean> {
   }
 }
 
+const AGENT_IMAGE_EXTENSIONS = new Set(['.webp', '.jpg', '.jpeg', '.png']);
+
+/**
+ * Normalises a string for agent-name ↔ filename matching:
+ * lowercase, collapse runs of spaces/hyphens/underscores to a single space.
+ */
+function normalizeAgentToken(value: string): string {
+  return value.toLowerCase().replace(/[\s\-_]+/g, ' ').trim();
+}
+
+/**
+ * Given an agent name and the absolute path to app/public/images/agents/,
+ * returns the public image path (/images/agents/<filename>) when exactly one
+ * file in that directory matches the normalised agent name.
+ *
+ * Returns undefined if:
+ *   - the directory does not exist or cannot be read
+ *   - no file matches
+ *   - more than one file matches (ambiguous — logs a warning and does not guess)
+ */
+async function resolveAgentImageFromDisk(
+  agentName: string,
+  agentImagesDir: string
+): Promise<string | undefined> {
+  if (!isNonEmptyString(agentName)) {
+    return undefined;
+  }
+
+  let entries: Array<{ name: string; isFile: () => boolean }>;
+  try {
+    entries = await fs.readdir(agentImagesDir, { withFileTypes: true }) as Array<{ name: string; isFile: () => boolean }>;
+  } catch {
+    return undefined;
+  }
+
+  const normalizedTarget = normalizeAgentToken(agentName);
+
+  const matches = entries.filter((entry) => {
+    if (!entry.isFile()) {
+      return false;
+    }
+    const ext = path.extname(entry.name).toLowerCase();
+    if (!AGENT_IMAGE_EXTENSIONS.has(ext)) {
+      return false;
+    }
+    const base = path.basename(entry.name, ext);
+    return normalizeAgentToken(base) === normalizedTarget;
+  });
+
+  if (matches.length === 0) {
+    return undefined;
+  }
+
+  if (matches.length > 1) {
+    process.stderr.write(
+      `[builder] Agent image ambiguous: ${matches.length} files in agents/ normalise to "${normalizedTarget}". ` +
+        `Matches: ${matches.map((m) => m.name).join(', ')}. Leaving agent.photo unset.\n`
+    );
+    return undefined;
+  }
+
+  const fileName = matches[0]!.name;
+  process.stderr.write(`[builder] Agent image auto-resolved: "${agentName}" → /images/agents/${fileName}\n`);
+  return `/images/agents/${fileName}`;
+}
+
 async function resetDirectory(dirPath: string): Promise<void> {
   await fs.rm(dirPath, { recursive: true, force: true });
   await fs.mkdir(dirPath, { recursive: true });
@@ -853,6 +919,14 @@ export async function build_site_from_listing(
     writtenFiles.push(destinationPath);
     agentImagePublicPath = `/images/agents/${destinationFileName}`;
     agentImageDiskPath = destinationPath;
+  } else if (selectedTemplate.payload_requirements.image_expectations.supports_agent_image) {
+    // No explicit agent image URL — try to resolve an existing file from disk by agent name.
+    const agentName = typeof payload.listing_agent === 'string'
+      ? payload.listing_agent
+      : (payload.listing_agent as { name?: string } | null)?.name ?? '';
+    agentImagePublicPath = await resolveAgentImageFromDisk(agentName, paths.agent_images_dir);
+    // agentImageDiskPath intentionally left undefined: the file already exists on disk and
+    // was not downloaded by this build, so it must not be re-staged as a new build artifact.
   }
 
   const templateData = selectedTemplate.map_payload_to_template_data({
