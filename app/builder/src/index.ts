@@ -1,3 +1,4 @@
+import * as nodeFs from 'node:fs';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -370,6 +371,9 @@ async function resetDirectory(dirPath: string): Promise<void> {
 }
 
 async function preparePropertyJsonPath(filePath: string, force: boolean): Promise<void> {
+  const directoryPath = path.dirname(filePath);
+  await fs.mkdir(directoryPath, { recursive: true });
+
   const exists = await pathExists(filePath);
   if (!exists) {
     return;
@@ -382,6 +386,38 @@ async function preparePropertyJsonPath(filePath: string, force: boolean): Promis
   }
 
   await fs.rm(filePath, { force: true });
+}
+
+async function writePropertyJsonOrThrow(
+  propertyJsonPath: string,
+  templateData: unknown
+): Promise<void> {
+  const { existsSync: existsSyncFn } = nodeFs as unknown as {
+    existsSync: (targetPath: string) => boolean;
+  };
+  const absolutePath = path.resolve(propertyJsonPath);
+  const directoryPath = path.dirname(absolutePath);
+
+  process.stderr.write(`[builder] WRITE_PATH absolute_path=${absolutePath}\n`);
+  process.stderr.write(`[builder] WRITE_DIRECTORY_CHECK absolute_path=${directoryPath}\n`);
+  await fs.mkdir(directoryPath, { recursive: true });
+  process.stderr.write(`[builder] WRITE_DIRECTORY_READY absolute_path=${directoryPath}\n`);
+
+  try {
+    process.stderr.write(`[builder] WRITE_START absolute_path=${absolutePath}\n`);
+    await fs.writeFile(absolutePath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
+    process.stderr.write(`[builder] WRITE_SUCCESS absolute_path=${absolutePath}\n`);
+  } catch (error) {
+    const message = error instanceof Error ? error.stack ?? error.message : String(error);
+    process.stderr.write(`[builder] WRITE_FAILURE absolute_path=${absolutePath} error=${message}\n`);
+    throw new Error(`Property JSON write failed at ${absolutePath}: ${message}`);
+  }
+
+  const exists = existsSyncFn(absolutePath);
+  process.stderr.write(`[builder] WRITE_EXISTS absolute_path=${absolutePath} exists=${exists}\n`);
+  if (!exists) {
+    throw new Error(`Property JSON write failed verification: existsSync returned false for ${absolutePath}`);
+  }
 }
 
 async function prepareListingImagesDirectory(dirPath: string, force: boolean): Promise<void> {
@@ -826,18 +862,8 @@ export async function build_site_from_listing(
     agentImagePublicPath,
   });
 
-  process.stderr.write(`[builder] WRITE_START: ${propertyJsonPath}\n`);
-  await fs.writeFile(propertyJsonPath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
+  await writePropertyJsonOrThrow(propertyJsonPath, templateData);
   writtenFiles.push(propertyJsonPath);
-  process.stderr.write(`[builder] WRITE_SUCCESS: ${propertyJsonPath}\n`);
-
-  // Contract check 1: property JSON must exist on disk before the Astro build begins.
-  if (!await pathExists(propertyJsonPath)) {
-    throw new Error(
-      `Property JSON write failed: file not found at expected path after write: ${propertyJsonPath}`
-    );
-  }
-  process.stderr.write(`[builder] Property JSON verified: ${propertyJsonPath}\n`);
 
   await runAppBuild(paths.app_dir, {
     slug,

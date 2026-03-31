@@ -477,6 +477,34 @@ test('builder continues when one listing image download returns 403 but another 
   }
 });
 
+test('building slug 9midsummer creates app/src/data/properties/9midsummer.json on disk', async () => {
+  const payload = makePayload({
+    address: '9 Midsummer Dr',
+    city: 'Potomac',
+    state: 'MD',
+    postal_code: '20854',
+  });
+  const slug = '9midsummer';
+  const artifactRoot = await makeArtifactRoot('builder-9midsummer');
+  const artifactFolderPath = path.join(artifactRoot, 'site');
+  payload.artifact_folder_path = artifactFolderPath;
+
+  try {
+    const result = await build_site_from_listing(payload, null, false);
+    const propertyPath = path.join(appDir, 'src/data/properties', `${slug}.json`);
+
+    assert.equal(result.slug, slug);
+    await fs.access(propertyPath);
+
+    const writtenJson = JSON.parse(await fs.readFile(propertyPath, 'utf8'));
+    assert.equal(writtenJson.meta.slug, slug);
+    assert.equal(writtenJson.address.street, payload.address);
+  } finally {
+    await cleanupSlug(slug, artifactFolderPath);
+    await fs.rm(artifactRoot, { recursive: true, force: true });
+  }
+});
+
 test('builder fails when no listing images can be downloaded', async () => {
   const originalFetch = global.fetch;
   const blockedUrls = [
