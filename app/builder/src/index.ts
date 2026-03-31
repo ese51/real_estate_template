@@ -790,13 +790,16 @@ export async function build_site_from_listing(
     referer: isNonEmptyString(payload.source_url) ? payload.source_url : undefined,
   };
 
+  const payloadSlugHint = isNonEmptyString(payload.slug) ? payload.slug : null;
   process.stderr.write(
     `[builder] INIT: ${JSON.stringify({
       cwd: process.cwd(),
       repo_root: repoRoot,
       app_dir: paths.app_dir,
       properties_dir: paths.properties_dir,
-      slug,
+      payload_slug_hint: payloadSlugHint,
+      derived_slug: slug,
+      slug_match: payloadSlugHint === null || payloadSlugHint === slug,
       property_json_path: propertyJsonPath,
     })}\n`
   );
