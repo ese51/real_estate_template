@@ -163,20 +163,13 @@ function buildFeatureItems(payload: {
   bathrooms: number;
   squareFeet: number;
   priceDisplay: string;
-  sourceUrl?: string | null;
 }): string[] {
-  const items = [
+  return [
     `${payload.bedrooms} bedrooms`,
     `${payload.bathrooms} bathrooms`,
     `${formatWholeNumber(payload.squareFeet)} sq ft`,
     `Listed at ${payload.priceDisplay}`,
   ];
-
-  if (isNonEmptyString(payload.sourceUrl)) {
-    items.push(`Source listing available at ${payload.sourceUrl.trim()}`);
-  }
-
-  return items;
 }
 
 function mapPayloadToPropertyData(
@@ -251,7 +244,6 @@ function mapPayloadToPropertyData(
           bathrooms,
           squareFeet,
           priceDisplay,
-          sourceUrl: payload.source_url,
         }),
       },
     ],
@@ -260,9 +252,7 @@ function mapPayloadToPropertyData(
       lat: 0,
       lng: 0,
       neighborhood: city,
-      highlights: isNonEmptyString(payload.source_url)
-        ? [`Source listing: ${payload.source_url.trim()}`]
-        : [`${city}, ${state} ${postalCode}`],
+      highlights: [`${city}, ${state} ${postalCode}`],
     },
     floor_plans: [],
     agent: {
