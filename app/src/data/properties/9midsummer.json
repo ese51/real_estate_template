@@ -16,11 +16,15 @@
   "price_display": "$1,099,900",
   "status": "For Sale",
   "tagline": "4-bedroom home in Gaithersburg, MD.",
-  "description": "<p>Spectacular renovation, fabulous floorplan, and possibly the best location in Washingtonian Woods backing to parkland, pond, and walking paths! Hardwoods flow from the entry foyer and throughout the main level. The large living room showcases crown molding, recessed lighting, a wood-burning masonry fireplace, and double French doors that open to the expansive tiered deck, while the spacious dining room features beautiful natural views through a large picture window and includes custom built-ins and decorator lighting. The remodeled kitchen is a standout, renovated to include granite countertops, and expansive granite-topped island, custom cabinetry, stainless steel appliances, recessed lighting, a double-door pantry, and a custom coffee station. The adjacent family room is brightened by skylights recessed lighting, and large windows, and features a double-sided masonry fireplace plus access to the attached garage and driveway. The private main-level office with double-door entry and built-ins provides an ideal workspace. The beautifully renovated powder room features decorator lighting, subway tile, designer tile flooring, and custom shelving. Hardwood flooring continues through the upper level hallway. The spacious primary suite includes a versatile sitting room/dressing area and a luxury bedroom retreat with a vaulted ceiling, a generous walk-in closet, and three sets of double-door closets. The fully renovated primary bath features marble and quartz finishes, custom cabinetry, a glass-enclosed shower a compartmented water closet, linen closet, and decorator tile, fixtures, and lighting. Three additional bedrooms are spacious and bright while the beautifully renovated second full bath boasts a solid surface vanity, custom cabinetry, wide plank LVP flooring, and a tub/shower with custom tile surround. The upper level also includes a well-appointed laundry room with a laundry sink, folding counter, hanging rod, and extra cabinetry. The finished lower level offers outstanding additional living space including a large recreation room with recessed lighting and a wood-burning fireplace, a custom-built bar, a versatile game room area, a big bonus room, and a beautifully updated full bath. This level also includes plenty of space for storage and direct access to the patio and backyard. Outside of this phenomenal home offers more lovely spaces in which to relax, entertain, and enjoy the natural views, including the tiered Trex deck, the patio, and the front porch. Additional highlights include a five-year-old roof, solar panels, an electric fence, and major system updates. Set on a picturesque cul-de-sac close to all this sought-after neighborhood has to offer, this home has it all!</p>",
+  "description": "<p>Set on a quiet cul-de-sac in Washingtonian Woods and backing to parkland, pond views, and walking paths, this extensively renovated home pairs a strong floorplan with a setting that feels notably private. Hardwood floors begin in the entry foyer and continue throughout the main level, where the rooms flow easily from one gathering space to the next.</p><p>The main level is designed for both entertaining and everyday comfort. A gracious living room with crown molding, recessed lighting, and a wood-burning masonry fireplace opens through double French doors to the expansive tiered deck, while the dining room is framed by natural views, custom built-ins, and polished designer lighting. At the center of the home, the renovated kitchen stands out with granite countertops, a substantial island, custom cabinetry, stainless steel appliances, a double-door pantry, and a dedicated coffee station. Just beyond, the family room is filled with natural light from skylights and oversized windows and is anchored by a double-sided fireplace. A private office with built-ins and a beautifully updated powder room complete the main level.</p><p>Upstairs, the primary suite offers the scale and flexibility of a true retreat, with a vaulted bedroom, a sitting room or dressing area, a generous walk-in closet, and multiple additional closets for exceptional storage. The renovated primary bath brings together marble and quartz finishes, custom cabinetry, a glass-enclosed shower, a linen closet, and refined fixtures and lighting. Three additional bedrooms are bright and well proportioned, served by an updated hall bath with custom tile surround and wide-plank LVP flooring. The upper-level laundry room adds another layer of convenience with a utility sink, folding counter, hanging rod, and extra cabinetry.</p><p>The finished lower level extends the home with a large recreation room, another wood-burning fireplace, a custom bar, a flexible game or lounge area, a spacious bonus room, a renovated full bath, and abundant storage, with direct access to the patio and backyard. Outside, the tiered Trex deck, patio, and welcoming front porch create multiple places to relax, entertain, and take in the surrounding greenery. Recent improvements including a newer roof, solar panels, an electric fence, and major system updates add substance to a home that is as practical as it is polished.</p>",
   "stats": {
     "beds": 4,
     "baths": 3.5,
-    "sqft": 3464
+    "sqft": 3464,
+    "lot_size": "0.16 acres (6,910 sq ft)",
+    "year_built": 1989,
+    "garage": "2-car garage",
+    "style": "Colonial"
   },
   "gallery": {
     "hero_image": "/images/9midsummer/listing-01.webp",
@@ -306,12 +310,55 @@
   },
   "features": [
     {
-      "category": "Listing Overview",
+      "category": "Architecture & Construction",
       "items": [
-        "4 bedrooms",
-        "3.5 bathrooms",
-        "3,464 sq ft",
-        "Listed at $1,099,900"
+        "Detached Colonial in Washingtonian Woods",
+        "Quiet cul-de-sac setting",
+        "Backs to parkland and pond views",
+        "Vinyl siding exterior",
+        "3,464 sq ft of finished living space",
+        "Five-year-old roof",
+        "Tiered Trex deck, patio, and covered front porch"
+      ]
+    },
+    {
+      "category": "Interior & Kitchen",
+      "items": [
+        "Hardwood floors through the foyer and main level",
+        "Living room with crown molding and recessed lighting",
+        "Wood-burning masonry fireplace in the living room",
+        "Double French doors open from the living room to the deck",
+        "Dining room with picture window, custom built-ins, and designer lighting",
+        "Renovated kitchen with granite countertops and oversized island",
+        "Custom cabinetry, stainless steel appliances, double-door pantry, and coffee station",
+        "Family room with skylights, large windows, and double-sided masonry fireplace"
+      ]
+    },
+    {
+      "category": "Bedrooms & Baths",
+      "items": [
+        "4-bedroom layout",
+        "3 full baths",
+        "Renovated powder room",
+        "Main-level private office",
+        "Office with double-door entry and built-ins",
+        "Primary suite with vaulted ceiling and separate sitting or dressing area",
+        "Walk-in closet plus three additional double-door closets in the primary suite",
+        "Renovated primary bath with marble and quartz finishes, custom cabinetry, and glass-enclosed shower",
+        "Finished lower level with recreation room, custom bar, bonus room, and renovated full bath",
+        "Walk-out access to the backyard"
+      ]
+    },
+    {
+      "category": "Systems & Efficiency",
+      "items": [
+        "Central air conditioning",
+        "Forced-air heating",
+        "Natural gas heat and hot water",
+        "Solar panels already in place",
+        "Major system updates already completed",
+        "Public water and sewer",
+        "Attached 2-car garage with driveway access"
       ]
     }
   ],
@@ -321,7 +368,11 @@
     "lng": 0,
     "neighborhood": "Gaithersburg",
     "highlights": [
-      "Gaithersburg, MD 20878"
+      "Washingtonian Woods neighborhood",
+      "Quiet cul-de-sac setting",
+      "Backs to parkland and pond views",
+      "Walking trails woven through the community",
+      "Outdoor pool, tennis courts, and club house"
     ]
   },
   "floor_plans": [],
