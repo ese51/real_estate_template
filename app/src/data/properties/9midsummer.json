@@ -385,6 +385,8 @@
     "brokerage": "The List Realty"
   },
   "schedule_showing": {
-    "enabled": false
+    "enabled": true,
+    "calendly_url": "",
+    "contact_form": true
   }
 }
