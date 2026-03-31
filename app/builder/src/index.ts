@@ -745,6 +745,7 @@ export async function build_site_from_listing(
     : null;
 
   const paths = getTemplatePaths();
+  const repoRoot = path.resolve(paths.app_dir, '..');
   const slug = await ensureSlug(payload, paths.properties_dir);
   const propertyJsonPath = path.join(paths.properties_dir, `${slug}.json`);
   const listingImagesDir = path.join(paths.listing_images_dir, slug);
@@ -752,6 +753,17 @@ export async function build_site_from_listing(
   const remoteDownloadContext: RemoteDownloadContext = {
     referer: isNonEmptyString(payload.source_url) ? payload.source_url : undefined,
   };
+
+  process.stderr.write(
+    `[builder] INIT: ${JSON.stringify({
+      cwd: process.cwd(),
+      repo_root: repoRoot,
+      app_dir: paths.app_dir,
+      properties_dir: paths.properties_dir,
+      slug,
+      property_json_path: propertyJsonPath,
+    })}\n`
+  );
 
   await preparePropertyJsonPath(propertyJsonPath, force_rebuild);
   await prepareListingImagesDirectory(listingImagesDir, force_rebuild);
@@ -814,8 +826,10 @@ export async function build_site_from_listing(
     agentImagePublicPath,
   });
 
+  process.stderr.write(`[builder] WRITE_START: ${propertyJsonPath}\n`);
   await fs.writeFile(propertyJsonPath, `${JSON.stringify(templateData, null, 2)}\n`, 'utf8');
   writtenFiles.push(propertyJsonPath);
+  process.stderr.write(`[builder] WRITE_SUCCESS: ${propertyJsonPath}\n`);
 
   // Contract check 1: property JSON must exist on disk before the Astro build begins.
   if (!await pathExists(propertyJsonPath)) {
@@ -857,34 +871,26 @@ export async function build_site_from_listing(
     writtenFiles.push(...artifactFiles);
   }
 
-  const baseResult: BuildSiteResult = {
+  // Contract step 6–9: git add → commit → push. No flag. No fallback. Throws on any failure.
+  const { commitHash, publicUrl } = gitPushListing({
+    repoRoot,
+    branch: PUBLISH_BRANCH,
+    slug,
+    propertyJsonPath,
+    listingImagesDir,
+    agentImageDiskPath,
+  });
+
+  return {
     slug,
     template_id: selectedTemplate.id,
     dist_dir: paths.dist_dir,
     route_path: selectedTemplate.output_behavior.route_path(slug),
     files_written: writtenFiles,
+    published: true,
+    commit_hash: commitHash,
+    public_url: publicUrl,
   };
-
-  if (payload.publish) {
-    const repoRoot = path.resolve(paths.app_dir, '..');
-    const { commitHash, publicUrl } = gitPushListing({
-      repoRoot,
-      branch: PUBLISH_BRANCH,
-      slug,
-      propertyJsonPath,
-      listingImagesDir,
-      agentImageDiskPath,
-    });
-
-    return {
-      ...baseResult,
-      published: true,
-      commit_hash: commitHash,
-      public_url: publicUrl,
-    };
-  }
-
-  return baseResult;
 }
 
 export { templateRegistry, defaultTemplate } from './registry';

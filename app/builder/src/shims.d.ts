@@ -6,6 +6,7 @@ declare const process: {
   stdout: { write: (value: string) => void };
   stderr: { write: (value: string) => void };
   exitCode?: number;
+  cwd: () => string;
 };
 declare const Buffer: {
   from: (input: ArrayBuffer) => unknown;

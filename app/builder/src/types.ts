@@ -28,8 +28,6 @@ export interface HiveMindListingPayload {
   slug?: string | null;
   agent_image_url?: string | null;
   site_template?: string | null;
-  /** When true, commits the property JSON + images and pushes to GitHub so Netlify redeploys. */
-  publish?: boolean | null;
 }
 
 export interface BuildSiteResult {
@@ -38,10 +36,9 @@ export interface BuildSiteResult {
   dist_dir: string;
   route_path: string;
   files_written: string[];
-  /** Populated when publish=true and the git push succeeded. */
-  published?: boolean;
-  commit_hash?: string;
-  public_url?: string;
+  published: true;
+  commit_hash: string;
+  public_url: string;
 }
 
 export interface ResolvedImage {
