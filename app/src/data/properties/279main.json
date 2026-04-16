@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "slug": "279main",
+    "site_title": "279 Main St — Groton, MA 01450",
+    "site_description": "279 Main St — Groton, MA 01450. 5 bedrooms, 4 baths, 8,800 sq ft. Listed at $2,995,000. This home is a truly extraordinary offering. An iconic 1887 former chapel in Groton Center, once owned by the prestigious Groton School, now beautifully converted to a single-family residence while preserving its",
+    "og_image": "/images/279main/listing-01.webp"
+  },
+  "address": {
+    "street": "279 Main St",
+    "city": "Groton",
+    "state": "MA",
+    "zip": "01450",
+    "full": "279 Main St, Groton, MA 01450"
+  },
+  "price": 2995000,
+  "price_display": "$2,995,000",
+  "status": "For Sale",
+  "tagline": "5-bedroom home in Groton, MA.",
+  "description": "<p>This home is a truly extraordinary offering. An iconic 1887 former chapel in Groton Center, once owned by the prestigious Groton School, now beautifully converted to a single-family residence while preserving its striking Gothic Revival architecture. Thoughtfully designed for multigenerational living with remarkable versatility, this home easily accommodates extended family, guests, or income-producing possibilities. A spacious apartment above the four-car garage expands the options even further. The connected lower level offers excellent privacy with its own entrance and features a full kitchen, two bedrooms, an office, laundry, and a bonus room ideal for an in-law suite. Set on a corner lot with two entrances and a circular driveway, the property also offers a private, fenced backyard and beautifully curated, low-maintenance grounds. A rare blend of architectural beauty, historic significance, and modern-day versatility</p>",
+  "stats": {
+    "beds": 5,
+    "baths": 4,
+    "sqft": 8800
+  },
+  "gallery": {
+    "hero_image": "/images/279main/listing-01.webp",
+    "images": [
+      {
+        "url": "/images/279main/listing-01.webp",
+        "alt": "279 Main St photo 1",
+        "caption": "Primary listing image"
+      },
+      {
+        "url": "/images/279main/listing-02.webp",
+        "alt": "279 Main St photo 2"
+      },
+      {
+        "url": "/images/279main/listing-03.webp",
+        "alt": "279 Main St photo 3"
+      },
+      {
+        "url": "/images/279main/listing-04.webp",
+        "alt": "279 Main St photo 4"
+      },
+      {
+        "url": "/images/279main/listing-05.webp",
+        "alt": "279 Main St photo 5"
+      },
+      {
+        "url": "/images/279main/listing-06.webp",
+        "alt": "279 Main St photo 6"
+      },
+      {
+        "url": "/images/279main/listing-07.webp",
+        "alt": "279 Main St photo 7"
+      },
+      {
+        "url": "/images/279main/listing-08.webp",
+        "alt": "279 Main St photo 8"
+      },
+      {
+        "url": "/images/279main/listing-09.webp",
+        "alt": "279 Main St photo 9"
+      }
+    ]
+  },
+  "features": [
+    {
+      "category": "Listing Overview",
+      "items": [
+        "5 bedrooms",
+        "4 bathrooms",
+        "8,800 sq ft",
+        "Listed at $2,995,000"
+      ]
+    }
+  ],
+  "schools": [],
+  "location": {
+    "lat": 0,
+    "lng": 0,
+    "neighborhood": "Groton",
+    "highlights": [
+      "Groton, MA 01450"
+    ]
+  },
+  "floor_plans": [],
+  "agent": {
+    "name": "Gina Anderson",
+    "title": "Listing Agent",
+    "phone": "",
+    "email": "",
+    "brokerage": "MGS Group Real Estate LTD - Wellesley"
+  },
+  "schedule_showing": {
+    "enabled": false
+  }
+}
